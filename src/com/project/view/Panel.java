@@ -1,6 +1,10 @@
 package com.project.view;
 
-import com.project.main.DBTest;
+import com.project.main.Main;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -9,6 +13,8 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.*;
+import java.util.Arrays;
 
 public class Panel extends JPanel implements ActionListener {
     int WIDTH;
@@ -19,7 +25,7 @@ public class Panel extends JPanel implements ActionListener {
     JButton doktorGiris = new JButton("Doktor Giriş");
     JButton girisYap = new JButton("Giriş Yap");
     int secti = 0;
-    final int kullanici_limit = 10, sifre_limit = 10;
+    final int kullanici_limit = 11, sifre_limit = 15;
     Panel(int WIDTH, int HEIGHT){
 
         this.WIDTH = WIDTH;
@@ -117,7 +123,36 @@ public class Panel extends JPanel implements ActionListener {
             repaint();
         } else if (e.getSource() == girisYap) {
             //Kontrol yap yaya
-            DBTest.frame.switchScreen();
+            Main.enUserName = kullaniciAdiGiris.getText();
+            Main.enPassword = new String(sifreGiris.getPassword());
+            String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
+                         "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
+
+            try (
+                    Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                    PreparedStatement ps = conn.prepareStatement(sql)
+            ) {
+                ps.setString(1, Main.enUserName);
+                ps.setString(2, Main.enPassword) ;
+
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    String ad = rs.getString("ad");
+                    String soyad = rs.getString("soyad");
+                    String rol = rs.getString("rol");
+
+                    System.out.println("Giriş başarılı!");
+                    System.out.println("Hoş geldiniz " + ad + " " + soyad + " (" + rol + ")");
+                    conn.close();
+                    Main.frame.switchScreen();
+                } else {
+                    System.out.println("Hatalı TC ya da şifre!");
+                }
+
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

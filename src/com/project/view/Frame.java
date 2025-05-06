@@ -32,5 +32,6 @@ public class Frame extends JFrame{
         frame.getContentPane().revalidate();
         frame.getContentPane().repaint();
         sistemUI.requestFocus();
+        sistemUI.initialize();
     }
 }
