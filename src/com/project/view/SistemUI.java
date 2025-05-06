@@ -6,6 +6,7 @@ import com.project.main.Main;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
@@ -16,7 +17,7 @@ public class SistemUI extends JPanel {
     int WIDTH;
     int HEIGHT;
     public String ad, soyad, email, dogum_tarihi, cinsiyet;
-    public Image profil_resim;
+    public BufferedImage profil_resmi;
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     SistemUI(int WIDTH, int HEIGHT){
         this.WIDTH = WIDTH;
@@ -27,7 +28,7 @@ public class SistemUI extends JPanel {
         this.setLayout(null);
     }
     public void initialize(){
-        String sql = "SELECT ad, soyad, email, dogum_tarihi, cinsiyet FROM KULLANICI " +
+        String sql = "SELECT ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
         try (
                 Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
@@ -43,9 +44,12 @@ public class SistemUI extends JPanel {
             email = rs.getString("email");
             dogum_tarihi = rs.getString("dogum_tarihi");
             cinsiyet = rs.getString("cinsiyet");
+            profil_resmi = ImageIO.read(rs.getBinaryStream("profil_resmi"));
 
         } catch (SQLException ex) {
             ex.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     public void paintComponent(Graphics g){
@@ -57,7 +61,7 @@ public class SistemUI extends JPanel {
         g.setFont(new Font("Consolas",Font.PLAIN,30));
         g.drawString("Diyabet Sistemi",450,100);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
-        //g.drawImage(profil_resim,10,150,this);
+        g.drawImage(profil_resmi,20,140,this);
         g.drawString("İsim: " + ad, 150,150);
         g.drawString("Cinsiyet: " + cinsiyet, 150,170);
         g.drawString("Doğum Tarihi: " + dogum_tarihi, 150,190);
