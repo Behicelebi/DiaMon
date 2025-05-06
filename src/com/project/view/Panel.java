@@ -24,8 +24,10 @@ public class Panel extends JPanel implements ActionListener {
     JButton hastaGiris = new JButton("Hasta Giriş");
     JButton doktorGiris = new JButton("Doktor Giriş");
     JButton girisYap = new JButton("Giriş Yap");
+    JButton geriButton = new JButton("Geri");
     int secti = 0;
     final int kullanici_limit = 11, sifre_limit = 15;
+    boolean girisHata = false;
     Panel(int WIDTH, int HEIGHT){
 
         this.WIDTH = WIDTH;
@@ -49,13 +51,21 @@ public class Panel extends JPanel implements ActionListener {
         doktorGiris.addActionListener(this);
         this.add(doktorGiris);
 
-        girisYap.setBounds(WIDTH/2-115,400,250,25);
+        girisYap.setBounds(WIDTH/2+35,400,100,25);
         girisYap.setFont(new Font("Calibri",Font.BOLD,15));
         girisYap.setHorizontalAlignment(SwingConstants.CENTER);
         girisYap.setFocusable(false);
         girisYap.setVisible(false);
         girisYap.addActionListener(this);
         this.add(girisYap);
+
+        geriButton.setBounds(WIDTH/2-115,400,100,25);
+        geriButton.setFont(new Font("Calibri",Font.BOLD,15));
+        geriButton.setHorizontalAlignment(SwingConstants.CENTER);
+        geriButton.setFocusable(false);
+        geriButton.setVisible(false);
+        geriButton.addActionListener(this);
+        this.add(geriButton);
 
         kullaniciAdiGiris.setPreferredSize(new Dimension(10,300));
         kullaniciAdiGiris.setBounds(WIDTH/2-115,300,250,20);
@@ -100,6 +110,9 @@ public class Panel extends JPanel implements ActionListener {
             g.drawString("Kullanıcı Adı:", WIDTH/2-115,290);
             g.drawString("Şifre:", WIDTH/2-115,340);
         }
+        g.setColor(Color.RED);
+        g.setFont(new Font("Consolas",Font.PLAIN,15));
+        if(girisHata){g.drawString("Hatalı TC veya Şifre girişi!",WIDTH/2-100,450);}
     }
 
     @Override
@@ -111,43 +124,59 @@ public class Panel extends JPanel implements ActionListener {
             kullaniciAdiGiris.setVisible(true);
             sifreGiris.setVisible(true);
             girisYap.setVisible(true);
+            geriButton.setVisible(true);
             repaint();
-        }
-        else if (e.getSource() == doktorGiris) {
+        } else if (e.getSource() == doktorGiris) {
             secti = 2;
             hastaGiris.setVisible(false);
             doktorGiris.setVisible(false);
             kullaniciAdiGiris.setVisible(true);
             sifreGiris.setVisible(true);
             girisYap.setVisible(true);
+            geriButton.setVisible(true);
+            repaint();
+        } else if (e.getSource() == geriButton) {
+            secti = 0;
+            hastaGiris.setVisible(true);
+            doktorGiris.setVisible(true);
+            kullaniciAdiGiris.setVisible(false);
+            kullaniciAdiGiris.setText("");
+            sifreGiris.setVisible(false);
+            sifreGiris.setText("");
+            girisYap.setVisible(false);
+            geriButton.setVisible(false);
+            girisHata = false;
             repaint();
         } else if (e.getSource() == girisYap) {
-            //Kontrol yap yaya
             Main.enUserName = kullaniciAdiGiris.getText();
             Main.enPassword = new String(sifreGiris.getPassword());
             String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                         "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
-
+                    "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
+            if(secti == 1){
+                sql = "SELECT ad, soyad, rol FROM KULLANICI " +
+                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
+                        "AND rol = 'HASTA'";
+            } else if (secti == 2) {
+                sql = "SELECT ad, soyad, rol FROM KULLANICI " +
+                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
+                        "AND rol = 'DOKTOR'";
+            }
             try (
                     Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
                     PreparedStatement ps = conn.prepareStatement(sql)
             ) {
                 ps.setString(1, Main.enUserName);
-                ps.setString(2, Main.enPassword) ;
+                ps.setString(2, Main.enPassword);
 
                 ResultSet rs = ps.executeQuery();
 
                 if (rs.next()) {
-                    String ad = rs.getString("ad");
-                    String soyad = rs.getString("soyad");
-                    String rol = rs.getString("rol");
-
-                    System.out.println("Giriş başarılı!");
-                    System.out.println("Hoş geldiniz " + ad + " " + soyad + " (" + rol + ")");
                     conn.close();
                     Main.frame.switchScreen();
                 } else {
-                    System.out.println("Hatalı TC ya da şifre!");
+                    conn.close();
+                    girisHata = true;
+                    repaint();
                 }
 
             } catch (SQLException ex) {

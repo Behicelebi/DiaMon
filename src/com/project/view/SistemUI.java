@@ -1,6 +1,7 @@
 package com.project.view;
 
 
+import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
 
 import javax.imageio.ImageIO;
@@ -16,9 +17,8 @@ import java.util.logging.Logger;
 public class SistemUI extends JPanel {
     int WIDTH;
     int HEIGHT;
-    public String ad, soyad, email, dogum_tarihi, cinsiyet;
-    public BufferedImage profil_resmi;
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
+    Kullanici doktor;
     SistemUI(int WIDTH, int HEIGHT){
         this.WIDTH = WIDTH;
         this.HEIGHT = HEIGHT;
@@ -39,13 +39,7 @@ public class SistemUI extends JPanel {
 
             ResultSet rs = ps.executeQuery();
             rs.next();
-            ad = rs.getString("ad");
-            soyad = rs.getString("soyad");
-            email = rs.getString("email");
-            dogum_tarihi = rs.getString("dogum_tarihi");
-            cinsiyet = rs.getString("cinsiyet");
-            profil_resmi = ImageIO.read(rs.getBinaryStream("profil_resmi"));
-
+            doktor = new Kullanici(rs.getString("ad"),rs.getString("soyad"),rs.getString("email"),rs.getString("dogum_tarihi"),rs.getString("cinsiyet"), ImageIO.read(rs.getBinaryStream("profil_resmi")));
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException e) {
@@ -58,13 +52,14 @@ public class SistemUI extends JPanel {
     }
     public void draw(Graphics g){
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Consolas",Font.PLAIN,30));
-        g.drawString("Diyabet Sistemi",450,100);
+        g.setFont(new Font("Consolas",Font.PLAIN,25));
+        g.drawString("Diyabet Sistemi",500,40);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
-        g.drawImage(profil_resmi,20,140,this);
-        g.drawString("İsim: " + ad, 150,150);
-        g.drawString("Cinsiyet: " + cinsiyet, 150,170);
-        g.drawString("Doğum Tarihi: " + dogum_tarihi, 150,190);
-        g.drawString("E-Posta: " + email, 150,210);
+        g.drawImage(doktor.profil_resmi,20,140,this);
+        g.drawString("İsim: " + doktor.ad, 150,150);
+        g.drawString("Cinsiyet: " + doktor.cinsiyet, 150,170);
+        g.drawString("Doğum Tarihi: " + doktor.dogum_tarihi, 150,190);
+        g.drawString("E-Posta: " + doktor.email, 150,210);
+        g.drawString("Rol: DOKTOR", 150,230);
     }
 }
