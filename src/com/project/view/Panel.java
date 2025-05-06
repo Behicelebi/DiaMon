@@ -172,7 +172,7 @@ public class Panel extends JPanel implements ActionListener {
 
                 if (rs.next()) {
                     conn.close();
-                    Main.frame.switchScreen();
+                    Main.frame.switchScreen(1);
                 } else {
                     conn.close();
                     girisHata = true;

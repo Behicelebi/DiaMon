@@ -37,6 +37,7 @@ public class SistemUI extends JPanel implements ActionListener {
     JButton girisYap = new JButton("Giriş Yap");
     JButton geriButton = new JButton("Geri");
     JButton profilSecimi = new JButton("Seç");
+    JButton cikisButton = new JButton("Çıkış Yap");
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean ekliyor = false;
     File selectedFile = null;
@@ -48,6 +49,13 @@ public class SistemUI extends JPanel implements ActionListener {
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.setLayout(null);
+
+        cikisButton.setBounds(50,30,100,20);
+        cikisButton.setFont(new Font("Calibri",Font.BOLD,15));
+        cikisButton.setHorizontalAlignment(SwingConstants.CENTER);
+        cikisButton.setFocusable(false);
+        cikisButton.addActionListener(this);
+        this.add(cikisButton);
 
         birSaat.setBounds(1000,90,100,20);
         birSaat.setFont(new Font("Calibri",Font.BOLD,15));
@@ -275,13 +283,20 @@ public class SistemUI extends JPanel implements ActionListener {
         } else if (e.getSource() == geriButton) {
             ekliyor = false;
             TC_Giris.setVisible(false);
+            TC_Giris.setText("");
             adGiris.setVisible(false);
+            adGiris.setText("");
             soyadGiris.setVisible(false);
+            soyadGiris.setText("");
             sifreGiris.setVisible(false);
+            sifreGiris.setText("");
             emailGiris.setVisible(false);
+            emailGiris.setText("");
             dogumGiris.setVisible(false);
+            dogumGiris.setText("");
             cinsiyetGiris.setVisible(false);
             profilSecimi.setVisible(false);
+            selectedFile = null;
             girisYap.setVisible(false);
             geriButton.setVisible(false);
             hastaEkle.setVisible(true);
@@ -335,7 +350,28 @@ public class SistemUI extends JPanel implements ActionListener {
                 throw new RuntimeException(ex);
             }
             initialize();
+            ekliyor = false;
+            TC_Giris.setVisible(false);
+            TC_Giris.setText("");
+            adGiris.setVisible(false);
+            adGiris.setText("");
+            soyadGiris.setVisible(false);
+            soyadGiris.setText("");
+            sifreGiris.setVisible(false);
+            sifreGiris.setText("");
+            emailGiris.setVisible(false);
+            emailGiris.setText("");
+            dogumGiris.setVisible(false);
+            dogumGiris.setText("");
+            cinsiyetGiris.setVisible(false);
+            profilSecimi.setVisible(false);
+            selectedFile = null;
+            girisYap.setVisible(false);
+            geriButton.setVisible(false);
+            hastaEkle.setVisible(true);
             repaint();
+        } else if (e.getSource() == cikisButton) {
+            Main.frame.switchScreen(0);
         }
     }
 }

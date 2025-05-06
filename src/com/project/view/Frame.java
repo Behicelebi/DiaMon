@@ -25,13 +25,29 @@ public class Frame extends JFrame{
         this.setVisible(true);
     }
 
-    public void switchScreen(){
+    public void switchScreen(int value){
         Frame frame = this;
-        frame.getContentPane().remove(panel);
-        frame.getContentPane().add(sistemUI);
+        if(value == 1){
+            frame.getContentPane().remove(panel);
+            frame.getContentPane().add(sistemUI);
+            panel.secti = 0;
+            panel.hastaGiris.setVisible(true);
+            panel.doktorGiris.setVisible(true);
+            panel.kullaniciAdiGiris.setVisible(false);
+            panel.kullaniciAdiGiris.setText("");
+            panel.sifreGiris.setVisible(false);
+            panel.sifreGiris.setText("");
+            panel.girisYap.setVisible(false);
+            panel.geriButton.setVisible(false);
+            panel.girisHata = false;
+            sistemUI.requestFocus();
+            sistemUI.initialize();
+        } else if (value == 0) {
+            frame.getContentPane().remove(sistemUI);
+            frame.getContentPane().add(panel);
+            panel.requestFocus();
+        }
         frame.getContentPane().revalidate();
         frame.getContentPane().repaint();
-        sistemUI.requestFocus();
-        sistemUI.initialize();
     }
 }
