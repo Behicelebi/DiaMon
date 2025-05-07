@@ -3,6 +3,8 @@ package com.project.view;
 
 import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
+import com.toedter.calendar.JCalendar;
+import com.toedter.calendar.JDateChooser;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class SistemUI extends JPanel implements ActionListener {
@@ -28,8 +29,6 @@ public class SistemUI extends JPanel implements ActionListener {
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     Kullanici doktor;
     ArrayList<Kullanici> hastalar = new ArrayList<>();
-    int gun = 6, ay = 5, yil = 2025, saat = 0;
-    JButton birSaat = new JButton("+1 Saat"), birGun = new JButton("+1 Gün");
     JButton hastaEkle = new JButton("Hasta Ekle");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), dogumGiris = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>();
@@ -38,6 +37,9 @@ public class SistemUI extends JPanel implements ActionListener {
     JButton geriButton = new JButton("Geri");
     JButton profilSecimi = new JButton("Seç");
     JButton cikisButton = new JButton("Çıkış Yap");
+    JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
+    java.sql.Date dogumSqlDate = null;
+    String dogumDate;
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean ekliyor = false;
     File selectedFile = null;
@@ -56,20 +58,6 @@ public class SistemUI extends JPanel implements ActionListener {
         cikisButton.setFocusable(false);
         cikisButton.addActionListener(this);
         this.add(cikisButton);
-
-        birSaat.setBounds(1000,90,100,20);
-        birSaat.setFont(new Font("Calibri",Font.BOLD,15));
-        birSaat.setHorizontalAlignment(SwingConstants.CENTER);
-        birSaat.setFocusable(false);
-        birSaat.addActionListener(this);
-        this.add(birSaat);
-
-        birGun.setBounds(1000,120,100,20);
-        birGun.setFont(new Font("Calibri",Font.BOLD,15));
-        birGun.setHorizontalAlignment(SwingConstants.CENTER);
-        birGun.setFocusable(false);
-        birGun.addActionListener(this);
-        this.add(birGun);
 
         hastaEkle.setBounds(1000,300,100,20);
         hastaEkle.setFont(new Font("Calibri",Font.BOLD,15));
@@ -160,10 +148,18 @@ public class SistemUI extends JPanel implements ActionListener {
                     super.insertString(offs, str, a);
             }
         });
-        this.add(dogumGiris);
+        //this.add(dogumGiris);
+
+        dogumSecimButton.setPreferredSize(new Dimension(10,300));
+        dogumSecimButton.setBounds(WIDTH/2-115,480,250,20);
+        dogumSecimButton.setFont(new Font("Calibri",Font.PLAIN,15));
+        dogumSecimButton.setVisible(false);
+        dogumSecimButton.setFocusable(false);
+        dogumSecimButton.addActionListener(this);
+        this.add(dogumSecimButton);
 
         cinsiyetGiris.setPreferredSize(new Dimension(10,300));
-        cinsiyetGiris.setBounds(WIDTH/2-115,530,250,20);
+        cinsiyetGiris.setBounds(WIDTH/2-115,550,250,20);
         cinsiyetGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         cinsiyetGiris.setVisible(false);
         cinsiyetGiris.setFocusable(false);
@@ -172,14 +168,14 @@ public class SistemUI extends JPanel implements ActionListener {
         this.add(cinsiyetGiris);
 
         profilSecimi.setPreferredSize(new Dimension(10,300));
-        profilSecimi.setBounds(WIDTH/2-115,580,250,20);
+        profilSecimi.setBounds(WIDTH/2-115,600,250,20);
         profilSecimi.setFont(new Font("Calibri",Font.PLAIN,15));
         profilSecimi.setVisible(false);
         profilSecimi.setFocusable(false);
         profilSecimi.addActionListener(this);
         this.add(profilSecimi);
 
-        girisYap.setBounds(WIDTH/2+35,630,100,25);
+        girisYap.setBounds(WIDTH/2+35,650,100,25);
         girisYap.setFont(new Font("Calibri",Font.BOLD,15));
         girisYap.setHorizontalAlignment(SwingConstants.CENTER);
         girisYap.setFocusable(false);
@@ -187,7 +183,7 @@ public class SistemUI extends JPanel implements ActionListener {
         girisYap.addActionListener(this);
         this.add(girisYap);
 
-        geriButton.setBounds(WIDTH/2-115,630,100,25);
+        geriButton.setBounds(WIDTH/2-115,650,100,25);
         geriButton.setFont(new Font("Calibri",Font.BOLD,15));
         geriButton.setHorizontalAlignment(SwingConstants.CENTER);
         geriButton.setFocusable(false);
@@ -217,6 +213,7 @@ public class SistemUI extends JPanel implements ActionListener {
             while(rs1.next()){
                 hastalar.add(new Kullanici(rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi"))));
             }
+            System.out.println(hastalar.size());
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException e) {
@@ -232,8 +229,6 @@ public class SistemUI extends JPanel implements ActionListener {
         g.setFont(new Font("Consolas",Font.PLAIN,25));
         g.drawString("Diyabet Sistemi",500,40);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
-        g.drawString("Tarih: " + gun + "." + ay + "." + yil, 1000,50);
-        g.drawString("Saat: " + saat + ":00:00", 1000,70);
 
         if(!ekliyor){
             g.drawImage(doktor.profil_resmi,20,140,this);
@@ -258,9 +253,10 @@ public class SistemUI extends JPanel implements ActionListener {
             g.drawString("Şifre:", WIDTH/2-115,370);
             g.drawString("EMail:", WIDTH/2-115,420);
             g.drawString("Dogum Tarihi:", WIDTH/2-115,470);
-            g.drawString("Cinsiyet:", WIDTH/2-115,520);
-            g.drawString("Profil Resmi:", WIDTH/2-115,570);
-            if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,620);}
+            if(dogumSqlDate != null){g.drawString("Seçilen Tarih: " + dogumSqlDate,WIDTH/2-115,520);}
+            g.drawString("Cinsiyet:", WIDTH/2-115,540);
+            g.drawString("Profil Resmi:", WIDTH/2-115,590);
+            if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,640);}
         }
     }
 
@@ -274,6 +270,7 @@ public class SistemUI extends JPanel implements ActionListener {
             sifreGiris.setVisible(true);
             emailGiris.setVisible(true);
             dogumGiris.setVisible(true);
+            dogumSecimButton.setVisible(true);
             cinsiyetGiris.setVisible(true);
             profilSecimi.setVisible(true);
             girisYap.setVisible(true);
@@ -293,6 +290,7 @@ public class SistemUI extends JPanel implements ActionListener {
             emailGiris.setVisible(false);
             emailGiris.setText("");
             dogumGiris.setVisible(false);
+            dogumSecimButton.setVisible(false);
             dogumGiris.setText("");
             cinsiyetGiris.setVisible(false);
             profilSecimi.setVisible(false);
@@ -311,6 +309,26 @@ public class SistemUI extends JPanel implements ActionListener {
                 selectedFile = fileChooser.getSelectedFile();
             }
             repaint();
+        } else if (e.getSource() == dogumSecimButton) {
+            JDateChooser dateChooser = new JDateChooser();
+            JDialog dialog = new JDialog(Main.frame, "Pick a Date", true);
+            dialog.setLayout(new BorderLayout());
+            JCalendar calendar = new JCalendar();
+            dialog.add(calendar, BorderLayout.CENTER);
+
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(ev -> {
+                dateChooser.setDate(calendar.getDate());
+                java.util.Date utilDate = dateChooser.getDate();
+                dogumSqlDate = new java.sql.Date(utilDate.getTime());
+                dialog.dispose();
+                repaint();
+            });
+
+            dialog.add(okButton, BorderLayout.SOUTH);
+            dialog.pack();
+            dialog.setLocationRelativeTo(Main.frame);
+            dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
             String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre_hash, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                     "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
@@ -326,9 +344,9 @@ public class SistemUI extends JPanel implements ActionListener {
                 ps.setString(1, TC_Giris.getText());
                 ps.setString(2, adGiris.getText());
                 ps.setString(3, soyadGiris.getText());
-                ps.setString(4, Arrays.toString(sifreGiris.getPassword()));
+                ps.setString(4, new String(sifreGiris.getPassword()));
                 ps.setString(5, emailGiris.getText());
-                ps.setString(6, dogumGiris.getText());
+                ps.setString(6, String.valueOf(dogumSqlDate));
                 if(cinsiyetGiris.getSelectedIndex() == 0){
                     ps.setString(7, "E");
                 }else{
@@ -362,6 +380,7 @@ public class SistemUI extends JPanel implements ActionListener {
             emailGiris.setVisible(false);
             emailGiris.setText("");
             dogumGiris.setVisible(false);
+            dogumSecimButton.setVisible(false);
             dogumGiris.setText("");
             cinsiyetGiris.setVisible(false);
             profilSecimi.setVisible(false);

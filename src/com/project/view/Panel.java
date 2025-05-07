@@ -151,22 +151,19 @@ public class Panel extends JPanel implements ActionListener {
             Main.enUserName = kullaniciAdiGiris.getText();
             Main.enPassword = new String(sifreGiris.getPassword());
             String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                    "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
-            if(secti == 1){
-                sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
-                        "AND rol = 'HASTA'";
-            } else if (secti == 2) {
-                sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
-                        "AND rol = 'DOKTOR'";
-            }
+                    "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
+                    "AND rol = ?";
             try (
                     Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
                     PreparedStatement ps = conn.prepareStatement(sql)
             ) {
                 ps.setString(1, Main.enUserName);
                 ps.setString(2, Main.enPassword);
+                if(secti == 1){
+                    ps.setString(3, "HASTA");
+                } else if (secti == 2) {
+                    ps.setString(3, "DOKTOR");
+                }
 
                 ResultSet rs = ps.executeQuery();
 
