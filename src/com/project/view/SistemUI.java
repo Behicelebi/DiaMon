@@ -30,7 +30,7 @@ public class SistemUI extends JPanel implements ActionListener {
     Kullanici doktor;
     ArrayList<Kullanici> hastalar = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle");
-    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), dogumGiris = new JTextField();
+    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
     JButton girisYap = new JButton("Giriş Yap");
@@ -39,9 +39,9 @@ public class SistemUI extends JPanel implements ActionListener {
     JButton cikisButton = new JButton("Çıkış Yap");
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     java.sql.Date dogumSqlDate = null;
-    String dogumDate;
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean ekliyor = false;
+    int hastaError = 0;
     File selectedFile = null;
 
     SistemUI(int WIDTH, int HEIGHT){
@@ -136,20 +136,6 @@ public class SistemUI extends JPanel implements ActionListener {
         });
         this.add(emailGiris);
 
-        dogumGiris.setPreferredSize(new Dimension(10,300));
-        dogumGiris.setBounds(WIDTH/2-115,480,250,20);
-        dogumGiris.setFont(new Font("Calibri",Font.PLAIN,15));
-        dogumGiris.setVisible(false);
-        dogumGiris.setDocument(new PlainDocument(){
-            @Override
-            public void insertString(int offs, String str, AttributeSet a)
-                    throws BadLocationException {
-                if(getLength() + str.length() <= 20)
-                    super.insertString(offs, str, a);
-            }
-        });
-        //this.add(dogumGiris);
-
         dogumSecimButton.setPreferredSize(new Dimension(10,300));
         dogumSecimButton.setBounds(WIDTH/2-115,480,250,20);
         dogumSecimButton.setFont(new Font("Calibri",Font.PLAIN,15));
@@ -192,9 +178,9 @@ public class SistemUI extends JPanel implements ActionListener {
         this.add(geriButton);
     }
     public void initialize(){
-        String sql = "SELECT ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi FROM KULLANICI " +
+        String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
-        String sql1 = "SELECT K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi FROM KULLANICI K, HASTA_DOKTOR H " +
+        String sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
                 "WHERE K.tc_no = H.hasta_tc AND H.doktor_tc = ?";
         try (
                 Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
@@ -205,15 +191,14 @@ public class SistemUI extends JPanel implements ActionListener {
             ps.setString(2, Main.enPassword);
             ResultSet rs = ps.executeQuery();
             rs.next();
-            doktor = new Kullanici(rs.getString("ad"),rs.getString("soyad"),rs.getString("email"),rs.getString("dogum_tarihi"),rs.getString("cinsiyet"), ImageIO.read(rs.getBinaryStream("profil_resmi")));
+            doktor = new Kullanici(rs.getLong("tc_no"),rs.getString("ad"),rs.getString("soyad"),rs.getString("email"),rs.getString("dogum_tarihi"),rs.getString("cinsiyet"), ImageIO.read(rs.getBinaryStream("profil_resmi")), rs.getString("rol"));
 
             ps1.setString(1,Main.enUserName);
             ResultSet rs1 = ps1.executeQuery();
             hastalar.clear();
             while(rs1.next()){
-                hastalar.add(new Kullanici(rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi"))));
+                hastalar.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
             }
-            System.out.println(hastalar.size());
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException e) {
@@ -233,18 +218,20 @@ public class SistemUI extends JPanel implements ActionListener {
         if(!ekliyor){
             g.drawImage(doktor.profil_resmi,20,140,this);
             g.drawString("Ad Soyad: " + doktor.ad + " " + doktor.soyad, 150,150);
-            g.drawString("Cinsiyet: " + doktor.cinsiyet, 150,170);
-            g.drawString("Doğum Tarihi: " + doktor.dogum_tarihi, 150,190);
-            g.drawString("E-Posta: " + doktor.email, 150,210);
-            g.drawString("Rol: DOKTOR", 150,230);
+            g.drawString("TC Kimlik: " + doktor.tc_no, 150,170);
+            g.drawString("Cinsiyet: " + doktor.cinsiyet, 150,190);
+            g.drawString("Doğum Tarihi: " + doktor.dogum_tarihi, 150,210);
+            g.drawString("E-Posta: " + doktor.email, 150,230);
+            g.drawString("Rol: " + doktor.rol, 150,250);
 
             for (int i = 0; i < hastalar.size(); i++) {
-                g.drawImage(hastalar.get(i).profil_resmi,20,260 + 120*i,this);
-                g.drawString("Ad Soyad: " + hastalar.get(i).ad + " " + hastalar.get(i).soyad, 150,270 + 120*i);
-                g.drawString("Cinsiyet: " + hastalar.get(i).cinsiyet, 150,290 + 120*i);
-                g.drawString("Doğum Tarihi: " + hastalar.get(i).dogum_tarihi, 150,310 + 120*i);
-                g.drawString("E-Posta: " + hastalar.get(i).email, 150,330 + 120*i);
-                g.drawString("Rol: HASTA", 150,350 + 120*i);
+                g.drawImage(hastalar.get(i).profil_resmi,20,270 + 130*i,this);
+                g.drawString("Ad Soyad: " + hastalar.get(i).ad + " " + hastalar.get(i).soyad, 150,280 + 130*i);
+                g.drawString("TC Kimlik: " + hastalar.get(i).tc_no, 150,300 + 130*i);
+                g.drawString("Cinsiyet: " + hastalar.get(i).cinsiyet, 150,320 + 130*i);
+                g.drawString("Doğum Tarihi: " + hastalar.get(i).dogum_tarihi, 150,340 + 130*i);
+                g.drawString("E-Posta: " + hastalar.get(i).email, 150,360 + 130*i);
+                g.drawString("Rol: " + hastalar.get(i).rol, 150,380 + 130*i);
             }
         } else {
             g.drawString("TC Kimlik:", WIDTH/2-115,220);
@@ -257,6 +244,13 @@ public class SistemUI extends JPanel implements ActionListener {
             g.drawString("Cinsiyet:", WIDTH/2-115,540);
             g.drawString("Profil Resmi:", WIDTH/2-115,590);
             if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,640);}
+            if(hastaError == 1){
+                g.setColor(Color.GREEN);
+                g.drawString("Hasta girişi başarılı", WIDTH/2-115,710);
+            } else if (hastaError == -1) {
+                g.setColor(Color.RED);
+                g.drawString("Hasta girişi başarısız", WIDTH/2-115,710);
+            }
         }
     }
 
@@ -269,13 +263,13 @@ public class SistemUI extends JPanel implements ActionListener {
             soyadGiris.setVisible(true);
             sifreGiris.setVisible(true);
             emailGiris.setVisible(true);
-            dogumGiris.setVisible(true);
             dogumSecimButton.setVisible(true);
             cinsiyetGiris.setVisible(true);
             profilSecimi.setVisible(true);
             girisYap.setVisible(true);
             geriButton.setVisible(true);
             hastaEkle.setVisible(false);
+            cikisButton.setVisible(false);
             repaint();
         } else if (e.getSource() == geriButton) {
             ekliyor = false;
@@ -289,15 +283,16 @@ public class SistemUI extends JPanel implements ActionListener {
             sifreGiris.setText("");
             emailGiris.setVisible(false);
             emailGiris.setText("");
-            dogumGiris.setVisible(false);
             dogumSecimButton.setVisible(false);
-            dogumGiris.setText("");
+            dogumSqlDate = null;
             cinsiyetGiris.setVisible(false);
             profilSecimi.setVisible(false);
             selectedFile = null;
             girisYap.setVisible(false);
             geriButton.setVisible(false);
             hastaEkle.setVisible(true);
+            cikisButton.setVisible(true);
+            hastaError = 0;
             repaint();
         } else if (e.getSource() == profilSecimi) {
             JFileChooser fileChooser = new JFileChooser();
@@ -362,33 +357,14 @@ public class SistemUI extends JPanel implements ActionListener {
                     System.out.println("Kullanıcı eklenemedi.");
                 }
                 conn.commit();
+                hastaError = 1;
+                repaint();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                hastaError = -1;
+                repaint();
             } catch (FileNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
-            initialize();
-            ekliyor = false;
-            TC_Giris.setVisible(false);
-            TC_Giris.setText("");
-            adGiris.setVisible(false);
-            adGiris.setText("");
-            soyadGiris.setVisible(false);
-            soyadGiris.setText("");
-            sifreGiris.setVisible(false);
-            sifreGiris.setText("");
-            emailGiris.setVisible(false);
-            emailGiris.setText("");
-            dogumGiris.setVisible(false);
-            dogumSecimButton.setVisible(false);
-            dogumGiris.setText("");
-            cinsiyetGiris.setVisible(false);
-            profilSecimi.setVisible(false);
-            selectedFile = null;
-            girisYap.setVisible(false);
-            geriButton.setVisible(false);
-            hastaEkle.setVisible(true);
-            repaint();
         } else if (e.getSource() == cikisButton) {
             Main.frame.switchScreen(0);
         }
