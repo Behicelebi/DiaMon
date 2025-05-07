@@ -3,6 +3,7 @@ package com.project.view;
 
 import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
+import com.project.util.EmailSender;
 import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
 
@@ -330,7 +331,7 @@ public class SistemUI extends JPanel implements ActionListener {
             String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)"+
                     "VALUES (?, ?)";
             try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
-                PreparedStatement ps = conn.prepareStatement(sql); PreparedStatement ps1 = conn.prepareStatement(sql1)) {
+                 PreparedStatement ps = conn.prepareStatement(sql); PreparedStatement ps1 = conn.prepareStatement(sql1)) {
 
                 ps1.setString(1,Main.enUserName);
                 ps1.setString(2,TC_Giris.getText());
@@ -353,6 +354,8 @@ public class SistemUI extends JPanel implements ActionListener {
                 ps1.executeUpdate();
                 if (affectedRows > 0) {
                     System.out.println("Kullanıcı başarıyla eklendi.");
+                    EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + soyadGiris.getText()
+                            + ";\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
                 } else {
                     System.out.println("Kullanıcı eklenemedi.");
                 }

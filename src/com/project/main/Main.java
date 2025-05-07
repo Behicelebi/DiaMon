@@ -1,5 +1,6 @@
 package com.project.main;
 
+import com.project.util.EmailSender;
 import com.project.view.Frame;
 
 public class Main {
