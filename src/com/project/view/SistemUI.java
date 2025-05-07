@@ -274,6 +274,7 @@ public class SistemUI extends JPanel implements ActionListener {
             repaint();
         } else if (e.getSource() == geriButton) {
             ekliyor = false;
+            initialize();
             TC_Giris.setVisible(false);
             TC_Giris.setText("");
             adGiris.setVisible(false);
@@ -354,8 +355,8 @@ public class SistemUI extends JPanel implements ActionListener {
                 ps1.executeUpdate();
                 if (affectedRows > 0) {
                     System.out.println("Kullanıcı başarıyla eklendi.");
-                    EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + soyadGiris.getText()
-                            + ";\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
+                    EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + " " + soyadGiris.getText()
+                            + " !\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
                 } else {
                     System.out.println("Kullanıcı eklenemedi.");
                 }
