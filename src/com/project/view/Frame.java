@@ -4,15 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Frame extends JFrame{
-    int WIDTH = 1200;
-    int HEIGHT = 800;
+    int WIDTH = 1280;
+    int HEIGHT = 720;
 
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int screenWidth = (int)screenSize.getWidth()/2-(WIDTH/2);
     int screenHeight = (int)screenSize.getHeight()/2-(HEIGHT/2);
 
-    Panel panel = new Panel(WIDTH,HEIGHT);
-    SistemUI sistemUI = new SistemUI(WIDTH,HEIGHT);
+    public Panel panel = new Panel(WIDTH,HEIGHT);
+    public SistemUI sistemUI = new SistemUI(WIDTH,HEIGHT);
 
     public Frame(){
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -20,7 +20,8 @@ public class Frame extends JFrame{
         this.setResizable(false);
         this.setLocation(screenWidth,screenHeight);
         this.setSize(WIDTH,HEIGHT);
-        this.add(panel);
+        this.setLayout(new BorderLayout());
+        this.add(panel, BorderLayout.CENTER);
         this.pack();
         this.setVisible(true);
     }
@@ -29,7 +30,7 @@ public class Frame extends JFrame{
         Frame frame = this;
         if(value == 1){
             frame.getContentPane().remove(panel);
-            frame.getContentPane().add(sistemUI);
+            frame.getContentPane().add(sistemUI, BorderLayout.CENTER);
             panel.secti = 0;
             panel.hastaGiris.setVisible(true);
             panel.doktorGiris.setVisible(true);
@@ -44,7 +45,7 @@ public class Frame extends JFrame{
             sistemUI.initialize();
         } else if (value == 0) {
             frame.getContentPane().remove(sistemUI);
-            frame.getContentPane().add(panel);
+            frame.getContentPane().add(panel, BorderLayout.CENTER);
             panel.requestFocus();
         }
         frame.getContentPane().revalidate();

@@ -28,6 +28,8 @@ public class Panel extends JPanel implements ActionListener {
     int secti = 0;
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean girisHata = false;
+    private Dimension originalSize = new Dimension(1280, 720);
+
     Panel(int WIDTH, int HEIGHT){
 
         this.WIDTH = WIDTH;
@@ -104,9 +106,14 @@ public class Panel extends JPanel implements ActionListener {
     public void draw(Graphics g){
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,30));
-        g.drawString("Diyabet Sistemi Giriş",425,100);
+        g.drawString("Diyabet Sistemi Giriş",WIDTH/2-170,100);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
-        if(secti != 0){
+        if(secti == 1){
+            g.drawString("HASTA GİRİŞİ",WIDTH/2-40,260);
+            g.drawString("Kullanıcı Adı:", WIDTH/2-115,290);
+            g.drawString("Şifre:", WIDTH/2-115,340);
+        } else if (secti == 2) {
+            g.drawString("DOKTOR GİRİŞİ",WIDTH/2-40,260);
             g.drawString("Kullanıcı Adı:", WIDTH/2-115,290);
             g.drawString("Şifre:", WIDTH/2-115,340);
         }
