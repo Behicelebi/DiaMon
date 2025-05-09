@@ -2,19 +2,21 @@ package com.project.view;
 
 import com.project.main.Main;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 
 import javax.swing.*;
-        import javax.swing.text.AttributeSet;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
-        import java.awt.event.ActionEvent;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
-        import java.util.Arrays;
+import java.util.Arrays;
 
 public class Panel extends JPanel implements ActionListener {
     int WIDTH;
@@ -81,6 +83,16 @@ public class Panel extends JPanel implements ActionListener {
                     super.insertString(offs, str, a);
             }
         });
+        kullaniciAdiGiris.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    girisYap.doClick();
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    geriButton.doClick();
+                }
+            }
+        });
         this.add(kullaniciAdiGiris);
 
         sifreGiris.setPreferredSize(new Dimension(10,300));
@@ -93,6 +105,16 @@ public class Panel extends JPanel implements ActionListener {
                     throws BadLocationException {
                 if(getLength() + str.length() <= sifre_limit)
                     super.insertString(offs, str, a);
+            }
+        });
+        sifreGiris.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    girisYap.doClick();
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    geriButton.doClick();
+                }
             }
         });
         this.add(sifreGiris);
@@ -155,36 +177,41 @@ public class Panel extends JPanel implements ActionListener {
             girisHata = false;
             repaint();
         } else if (e.getSource() == girisYap) {
-            Main.enUserName = kullaniciAdiGiris.getText();
-            Main.enPassword = new String(sifreGiris.getPassword());
-            String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                    "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
-                    "AND rol = ?";
-            try (
-                    Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
-                    PreparedStatement ps = conn.prepareStatement(sql)
-            ) {
-                ps.setString(1, Main.enUserName);
-                ps.setString(2, Main.enPassword);
-                if(secti == 1){
-                    ps.setString(3, "HASTA");
-                } else if (secti == 2) {
-                    ps.setString(3, "DOKTOR");
+            if(!kullaniciAdiGiris.getText().equals("") && !sifreGiris.getText().equals("")){
+                Main.enUserName = kullaniciAdiGiris.getText();
+                Main.enPassword = new String(sifreGiris.getPassword());
+                String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
+                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
+                        "AND rol = ?";
+                try (
+                        Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                        PreparedStatement ps = conn.prepareStatement(sql)
+                ) {
+                    ps.setString(1, Main.enUserName);
+                    ps.setString(2, Main.enPassword);
+                    if(secti == 1){
+                        ps.setString(3, "HASTA");
+                    } else if (secti == 2) {
+                        ps.setString(3, "DOKTOR");
+                    }
+
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next()) {
+                        conn.close();
+                        Main.frame.switchScreen(1);
+                    } else {
+                        conn.close();
+                        girisHata = true;
+                        repaint();
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
-
-                ResultSet rs = ps.executeQuery();
-
-                if (rs.next()) {
-                    conn.close();
-                    Main.frame.switchScreen(1);
-                } else {
-                    conn.close();
-                    girisHata = true;
-                    repaint();
-                }
-
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } else {
+                girisHata = true;
+                repaint();
             }
         }
     }

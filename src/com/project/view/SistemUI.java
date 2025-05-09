@@ -14,40 +14,44 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.logging.Logger;
+import java.util.Date;
 
 public class SistemUI extends JPanel implements ActionListener , MouseWheelListener {
+    enum Screen {
+        MAIN,
+        HASTA_EKLE,
+        HASTA_PROFIL
+    }
+    Screen currentScreen = Screen.MAIN;
     int WIDTH;
     int HEIGHT;
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
-    Kullanici doktor;
-    ArrayList<Kullanici> hastalar = new ArrayList<>();
-    JButton hastaEkle = new JButton("Hasta Ekle");
+    Kullanici kullanici;
+    Rectangle kullaniciRect = new Rectangle(10,130,700,130);
+    ArrayList<Kullanici> relations = new ArrayList<>();
+    ArrayList<Rectangle> relationsRects = new ArrayList<>();
+    JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
-    JButton girisYap = new JButton("Hasta Ekle");
-    JButton geriButton = new JButton("Geri");
-    JButton profilSecimi = new JButton("Seç");
-    JButton cikisButton = new JButton("Çıkış Yap");
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
-    java.sql.Date dogumSqlDate = null;
+    Date dogumSqlDate = null;
     final int kullanici_limit = 11, sifre_limit = 15;
-    boolean ekliyor = false;
     int hastaError = 0;
+    int secilenHasta = 0;
     File selectedFile = null;
-    Rectangle doktorRect = new Rectangle(10,130,700,130);
-    ArrayList<Rectangle> hastalarRects = new ArrayList<>();
+    Date[] selectedDateTime = {new Date()};
+    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
 
     SistemUI(int WIDTH, int HEIGHT){
         this.WIDTH = WIDTH;
@@ -58,12 +62,33 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.setLayout(null);
         this.addMouseWheelListener(this);
 
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e){
+                for (int i = 0; i< relationsRects.size(); i++) {
+                    if (relationsRects.get(i).contains(e.getPoint()) && relationsRects.get(i).y > 130 && kullanici.rol.equals("DOKTOR") && currentScreen == Screen.MAIN) {
+                        currentScreen = Screen.HASTA_PROFIL;
+                        cikisButton.setText("Geri");
+                        secilenHasta = i;
+                        repaint();
+                    }
+                }
+            }
+        });
+
         cikisButton.setBounds(50,30,100,20);
         cikisButton.setFont(new Font("Calibri",Font.BOLD,15));
         cikisButton.setHorizontalAlignment(SwingConstants.CENTER);
         cikisButton.setFocusable(false);
         cikisButton.addActionListener(this);
         this.add(cikisButton);
+
+        selectDate.setBounds(960,60,100,20);
+        selectDate.setFont(new Font("Calibri",Font.BOLD,15));
+        selectDate.setHorizontalAlignment(SwingConstants.CENTER);
+        selectDate.setFocusable(false);
+        selectDate.addActionListener(this);
+        this.add(selectDate);
 
         hastaEkle.setBounds(1100,300,100,20);
         hastaEkle.setFont(new Font("Calibri",Font.BOLD,15));
@@ -186,26 +211,41 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
-        String sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
-                "WHERE K.tc_no = H.hasta_tc AND H.doktor_tc = ?";
         try (
                 Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
-                PreparedStatement ps = conn.prepareStatement(sql);
-                PreparedStatement ps1 = conn.prepareStatement(sql1)
+                PreparedStatement ps = conn.prepareStatement(sql)
         ) {
             ps.setString(1, Main.enUserName);
             ps.setString(2, Main.enPassword);
             ResultSet rs = ps.executeQuery();
             rs.next();
-            doktor = new Kullanici(rs.getLong("tc_no"),rs.getString("ad"),rs.getString("soyad"),rs.getString("email"),rs.getString("dogum_tarihi"),rs.getString("cinsiyet"), ImageIO.read(rs.getBinaryStream("profil_resmi")), rs.getString("rol"));
+            kullanici = new Kullanici(rs.getLong("tc_no"),rs.getString("ad"),rs.getString("soyad"),rs.getString("email"),rs.getString("dogum_tarihi"),rs.getString("cinsiyet"), ImageIO.read(rs.getBinaryStream("profil_resmi")), rs.getString("rol"));
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            ps1.setString(1,Main.enUserName);
-            ResultSet rs1 = ps1.executeQuery();
-            hastalar.clear();
+        String sql1 = "";
+        if(kullanici.rol.equals("DOKTOR")){
+            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
+                    "WHERE K.tc_no = H.hasta_tc AND H.doktor_tc = ?";
+        } else if (kullanici.rol.equals("HASTA")) {
+            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
+                    "WHERE K.tc_no = H.doktor_tc AND H.hasta_tc = ?";
+        }
+        try (
+                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                PreparedStatement ps = conn.prepareStatement(sql1);
+        ) {
+            ps.setString(1,Main.enUserName);
+            ResultSet rs1 = ps.executeQuery();
+            relations.clear();
+            relationsRects.clear();
             int i = 0;
             while(rs1.next()){
-                hastalar.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
-                hastalarRects.add(new Rectangle(10,270 + 140*i,700,130));
+                relations.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
+                relationsRects.add(new Rectangle(10,270 + 140*i,700,130));
                 i++;
             }
         } catch (SQLException ex) {
@@ -213,6 +253,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        if(kullanici.rol.equals("DOKTOR")){hastaEkle.setVisible(true);}
+        else if (kullanici.rol.equals("HASTA")) {hastaEkle.setVisible(false);}
     }
     public void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -223,34 +265,39 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g.setFont(new Font("Consolas",Font.PLAIN,15));
         g.setColor(Color.WHITE);
 
-        if(!ekliyor){
-            for (int i = 0; i < hastalar.size(); i++) {
-                g.setColor(Color.BLUE);
-                g.fillRect(hastalarRects.get(i).x,hastalarRects.get(i).y,hastalarRects.get(i).width,hastalarRects.get(i).height);
+        if(currentScreen == Screen.MAIN){
+
+            for (int i = 0; i < relations.size(); i++) {
+                if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.BLUE);}
+                else if (kullanici.rol.equals("HASTA")){g.setColor(Color.RED);}
+                g.fillRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height);
                 g.setColor(Color.WHITE);
-                g.drawImage(hastalar.get(i).profil_resmi,20,hastalarRects.get(i).y + 20,this);
-                g.drawString("Ad Soyad: " + hastalar.get(i).ad + " " + hastalar.get(i).soyad, 150,hastalarRects.get(i).y + 20);
-                g.drawString("TC Kimlik: " + hastalar.get(i).tc_no, 150,hastalarRects.get(i).y + 40);
-                g.drawString("Cinsiyet: " + hastalar.get(i).cinsiyet, 150,hastalarRects.get(i).y + 60);
-                g.drawString("Doğum Tarihi: " + hastalar.get(i).dogum_tarihi, 150,hastalarRects.get(i).y + 80);
-                g.drawString("E-Posta: " + hastalar.get(i).email, 150,hastalarRects.get(i).y + 100);
-                g.drawString("Rol: " + hastalar.get(i).rol, 150,hastalarRects.get(i).y + 120);
+                g.drawImage(relations.get(i).profil_resmi,20, relationsRects.get(i).y + 20,this);
+                g.drawString("Ad Soyad: " + relations.get(i).ad + " " + relations.get(i).soyad, 150, relationsRects.get(i).y + 20);
+                g.drawString("TC Kimlik: " + relations.get(i).tc_no, 150, relationsRects.get(i).y + 40);
+                g.drawString("Cinsiyet: " + relations.get(i).cinsiyet, 150, relationsRects.get(i).y + 60);
+                g.drawString("Doğum Tarihi: " + relations.get(i).dogum_tarihi, 150, relationsRects.get(i).y + 80);
+                g.drawString("E-Posta: " + relations.get(i).email, 150, relationsRects.get(i).y + 100);
+                g.drawString("Rol: " + relations.get(i).rol, 150, relationsRects.get(i).y + 120);
             }
 
             g.setColor(Color.BLACK);
-            g.fillRect(0,0,WIDTH,doktorRect.height + doktorRect.y);
+            g.fillRect(0,0,WIDTH,kullaniciRect.height + kullaniciRect.y);
 
-            g.setColor(Color.RED);
-            g.fillRect(doktorRect.x,doktorRect.y, doktorRect.width, doktorRect.height);
-            g.drawImage(doktor.profil_resmi,20,150,this);
+            if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.RED);}
+            else if (kullanici.rol.equals("HASTA")){g.setColor(Color.BLUE);}
+            g.fillRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height);
+            g.drawImage(kullanici.profil_resmi,20,150,this);
             g.setColor(Color.WHITE);
-            g.drawString("Ad Soyad: " + doktor.ad + " " + doktor.soyad, 150,150);
-            g.drawString("TC Kimlik: " + doktor.tc_no, 150,170);
-            g.drawString("Cinsiyet: " + doktor.cinsiyet, 150,190);
-            g.drawString("Doğum Tarihi: " + doktor.dogum_tarihi, 150,210);
-            g.drawString("E-Posta: " + doktor.email, 150,230);
-            g.drawString("Rol: " + doktor.rol, 150,250);
-        } else {
+            g.drawString("Ad Soyad: " + kullanici.ad + " " + kullanici.soyad, 150,150);
+            g.drawString("TC Kimlik: " + kullanici.tc_no, 150,170);
+            g.drawString("Cinsiyet: " + kullanici.cinsiyet, 150,190);
+            g.drawString("Doğum Tarihi: " + kullanici.dogum_tarihi, 150,210);
+            g.drawString("E-Posta: " + kullanici.email, 150,230);
+            g.drawString("Rol: " + kullanici.rol, 150,250);
+
+        } else if(currentScreen == Screen.HASTA_EKLE){
+            g.drawString("HASTA EKLEME",WIDTH/2-40,90);
             g.drawString("TC Kimlik:", WIDTH/2-115,120);
             g.drawString("Ad:", WIDTH/2-115,170);
             g.drawString("Soyad:", WIDTH/2-115,220);
@@ -268,16 +315,29 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 g.setColor(Color.RED);
                 g.drawString("Hasta girişi başarısız", WIDTH/2-115,610);
             }
+        } else if (currentScreen == Screen.HASTA_PROFIL) {
+            g.setColor(Color.BLUE);
+            g.fillRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height);
+            g.drawImage(relations.get(secilenHasta).profil_resmi,20,150,this);
+            g.setColor(Color.WHITE);
+            g.drawString("Ad Soyad: " + relations.get(secilenHasta).ad + " " + relations.get(secilenHasta).soyad, 150,150);
+            g.drawString("TC Kimlik: " + relations.get(secilenHasta).tc_no, 150,170);
+            g.drawString("Cinsiyet: " + relations.get(secilenHasta).cinsiyet, 150,190);
+            g.drawString("Doğum Tarihi: " + relations.get(secilenHasta).dogum_tarihi, 150,210);
+            g.drawString("E-Posta: " + relations.get(secilenHasta).email, 150,230);
+            g.drawString("Rol: " + relations.get(secilenHasta).rol, 150,250);
         }
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,25));
         g.drawString("Diyabet Sistemi",550,40);
+        g.setFont(new Font("Consolas",Font.PLAIN,15));
+        g.drawString("Current Date: " + formatter.format(selectedDateTime[0]), 960,40);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == hastaEkle){
-            ekliyor = true;
+            currentScreen = Screen.HASTA_EKLE;
             TC_Giris.setVisible(true);
             adGiris.setVisible(true);
             soyadGiris.setVisible(true);
@@ -292,7 +352,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             cikisButton.setVisible(false);
             repaint();
         } else if (e.getSource() == geriButton) {
-            ekliyor = false;
+            currentScreen = Screen.MAIN;
             initialize();
             TC_Giris.setVisible(false);
             TC_Giris.setText("");
@@ -311,7 +371,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             selectedFile = null;
             girisYap.setVisible(false);
             geriButton.setVisible(false);
-            hastaEkle.setVisible(true);
             cikisButton.setVisible(true);
             hastaError = 0;
             repaint();
@@ -336,7 +395,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             okButton.addActionListener(ev -> {
                 dateChooser.setDate(calendar.getDate());
                 java.util.Date utilDate = dateChooser.getDate();
-                dogumSqlDate = new java.sql.Date(utilDate.getTime());
+                dogumSqlDate = new Date(utilDate.getTime());
                 dialog.dispose();
                 repaint();
             });
@@ -346,6 +405,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dialog.setLocationRelativeTo(Main.frame);
             dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
+            //Bu hata kontrol için sonra test ederim (etmedi)
+            //if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && dogumSqlDate != null && selectedFile != null){}
             String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre_hash, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                     "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
             String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)"+
@@ -389,18 +450,74 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 throw new RuntimeException(ex);
             }
         } else if (e.getSource() == cikisButton) {
-            Main.frame.switchScreen(0);
+            if(currentScreen == Screen.MAIN){
+                int result = JOptionPane.showConfirmDialog(null, "Çıkış yapmak istediğinize emin misiniz?", "Çıkış Yapma", JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    Main.frame.switchScreen(0);
+                }
+            }
+            else if (currentScreen == Screen.HASTA_PROFIL) {
+                cikisButton.setText("Çıkış Yap");
+                currentScreen = Screen.MAIN;
+                repaint();
+            }
+        } else if (e.getSource() == selectDate) {
+            JDialog dialog = new JDialog(Main.frame, "Choose Date and Time", true);
+            dialog.setLayout(new BorderLayout());
+
+            JCalendar calendar = new JCalendar();
+            calendar.setDate(selectedDateTime[0]);
+
+            JPanel timePanel = new JPanel();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(selectedDateTime[0]);
+
+            SpinnerNumberModel hourModel = new SpinnerNumberModel(cal.get(Calendar.HOUR_OF_DAY), 0, 23, 1);
+            SpinnerNumberModel minuteModel = new SpinnerNumberModel(cal.get(Calendar.MINUTE), 0, 59, 1);
+
+            JSpinner hourSpinner = new JSpinner(hourModel);
+            JSpinner minuteSpinner = new JSpinner(minuteModel);
+
+            timePanel.add(new JLabel("Hour:"));
+            timePanel.add(hourSpinner);
+            timePanel.add(new JLabel("Minute:"));
+            timePanel.add(minuteSpinner);
+
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(ev -> {
+                Date dateOnly = calendar.getDate();
+
+                Calendar newDateTime = Calendar.getInstance();
+                newDateTime.setTime(dateOnly);
+                newDateTime.set(Calendar.HOUR_OF_DAY, (int) hourSpinner.getValue());
+                newDateTime.set(Calendar.MINUTE, (int) minuteSpinner.getValue());
+                newDateTime.set(Calendar.SECOND, 0);
+                newDateTime.set(Calendar.MILLISECOND, 0);
+
+                selectedDateTime[0] = newDateTime.getTime();
+                dialog.dispose();
+                repaint();
+            });
+
+            dialog.add(calendar, BorderLayout.CENTER);
+            dialog.add(timePanel, BorderLayout.NORTH);
+            dialog.add(okButton, BorderLayout.SOUTH);
+            dialog.pack();
+            dialog.setLocationRelativeTo(Main.frame);
+            dialog.setVisible(true);
         }
     }
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int notches = e.getWheelRotation();
-        if((hastalarRects.get(0).y >= 270 && notches > 0) || hastalarRects.get(0).y != 270){
-            if((hastalarRects.get(hastalarRects.size()-1).y >= 270 && notches < 0) || hastalarRects.get(hastalarRects.size()-1).y != 270){
-                for (int i = 0; i < hastalarRects.size(); i++) {
-                    hastalarRects.get(i).y -= notches*20;
-                    repaint();
+        if(relationsRects.size() != 0 && currentScreen == Screen.MAIN){
+            if((relationsRects.get(0).y >= 270 && notches > 0) || relationsRects.get(0).y != 270){
+                if((relationsRects.get(relationsRects.size()-1).y >= 270 && notches < 0) || relationsRects.get(relationsRects.size()-1).y != 270){
+                    for (int i = 0; i < relationsRects.size(); i++) {
+                        relationsRects.get(i).y -= notches*20;
+                        repaint();
+                    }
                 }
             }
         }
