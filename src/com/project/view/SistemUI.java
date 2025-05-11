@@ -395,7 +395,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             okButton.addActionListener(ev -> {
                 dateChooser.setDate(calendar.getDate());
                 java.util.Date utilDate = dateChooser.getDate();
-                dogumSqlDate = new Date(utilDate.getTime());
+                dogumSqlDate = new java.sql.Date(utilDate.getTime());
                 dialog.dispose();
                 repaint();
             });
