@@ -189,7 +189,7 @@ public class Panel extends JPanel implements ActionListener {
                 Main.enUserName = kullaniciAdiGiris.getText();
                 Main.enPassword = new String(sifreGiris.getPassword());
                 String sql = "SELECT ad, soyad, rol FROM KULLANICI " +
-                        "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
+                        "WHERE tc_no = ? AND sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))"+
                         "AND rol = ?";
                 try (
                         Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);

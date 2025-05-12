@@ -28,7 +28,7 @@ public class FillDatabaseTables {
                 "IF NOT EXISTS (SELECT * FROM KULLANICI WHERE tc_no = ?) " +
                         "BEGIN " +
                         "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                        "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), 'admin123')), ?, ?, ?, ?, ?) " +
                         "END";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -37,17 +37,12 @@ public class FillDatabaseTables {
             pstmt.setLong(2, tcNo);
             pstmt.setString(3, "Murat Emre");
             pstmt.setString(4, "Biçici");
-
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashed = md.digest("admin123".getBytes());
-            pstmt.setBytes(5, hashed);
-
-            pstmt.setString(6, "muratemrebicici@gmail.com");
-            pstmt.setDate(7, Date.valueOf("2005-08-30"));
-            pstmt.setString(8, "E");
+            pstmt.setString(5, "muratemrebicici@gmail.com");
+            pstmt.setDate(6, Date.valueOf("2005-08-30"));
+            pstmt.setString(7, "E");
             byte[] resim = setResim("textures/profil_resmi.png"); 
-            pstmt.setBytes(9, resim);
-            pstmt.setString(10, "DOKTOR");
+            pstmt.setBytes(8, resim);
+            pstmt.setString(9, "DOKTOR");
 
             pstmt.executeUpdate();
         }
