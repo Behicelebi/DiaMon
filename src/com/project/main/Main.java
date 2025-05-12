@@ -1,6 +1,7 @@
 package com.project.main;
 
-import com.project.util.EmailSender;
+import com.project.model.CreateDatabase;
+import com.project.model.FillDatabaseTables;
 import com.project.view.Frame;
 
 public class Main {
@@ -10,6 +11,8 @@ public class Main {
     public static String enUserName, enPassword;
     public static Frame frame;
     public static void main(String[] args) {
+        new CreateDatabase();
+        new FillDatabaseTables();
         frame = new Frame();
     }
 }

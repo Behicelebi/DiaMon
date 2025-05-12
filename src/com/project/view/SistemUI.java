@@ -468,48 +468,49 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
             //Bu hata kontrol için sonra test ederim (etmedi)
-            //if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && dogumSqlDate != null && selectedFile != null){}
-            String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre_hash, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
-                    "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
-            String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)"+
-                    "VALUES (?, ?)";
-            try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
-                 PreparedStatement ps = conn.prepareStatement(sql); PreparedStatement ps1 = conn.prepareStatement(sql1)) {
+            if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && dogumSqlDate != null && selectedFile != null) {
+                String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre_hash, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
+                        "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
+                String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)" +
+                        "VALUES (?, ?)";
+                try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                     PreparedStatement ps = conn.prepareStatement(sql); PreparedStatement ps1 = conn.prepareStatement(sql1)) {
 
-                ps1.setString(1,Main.enUserName);
-                ps1.setString(2,TC_Giris.getText());
+                    ps1.setString(1, Main.enUserName);
+                    ps1.setString(2, TC_Giris.getText());
 
-                FileInputStream fis = new FileInputStream(selectedFile);
-                ps.setString(1, TC_Giris.getText());
-                ps.setString(2, adGiris.getText());
-                ps.setString(3, soyadGiris.getText());
-                ps.setString(4, new String(sifreGiris.getPassword()));
-                ps.setString(5, emailGiris.getText());
-                ps.setString(6, String.valueOf(dogumSqlDate));
-                if(cinsiyetGiris.getSelectedIndex() == 0){
-                    ps.setString(7, "E");
-                }else{
-                    ps.setString(7, "K");
+                    FileInputStream fis = new FileInputStream(selectedFile);
+                    ps.setString(1, TC_Giris.getText());
+                    ps.setString(2, adGiris.getText());
+                    ps.setString(3, soyadGiris.getText());
+                    ps.setString(4, new String(sifreGiris.getPassword()));
+                    ps.setString(5, emailGiris.getText());
+                    ps.setString(6, String.valueOf(dogumSqlDate));
+                    if (cinsiyetGiris.getSelectedIndex() == 0) {
+                        ps.setString(7, "E");
+                    } else {
+                        ps.setString(7, "K");
+                    }
+                    ps.setBinaryStream(8, fis, (int) selectedFile.length());
+
+                    int affectedRows = ps.executeUpdate();
+                    ps1.executeUpdate();
+                    if (affectedRows > 0) {
+                        System.out.println("Kullanıcı başarıyla eklendi.");
+                        EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + " " + soyadGiris.getText()
+                                + " !\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
+                    } else {
+                        System.out.println("Kullanıcı eklenemedi.");
+                    }
+                    conn.commit();
+                    hastaError = 1;
+                    repaint();
+                } catch (SQLException ex) {
+                    hastaError = -1;
+                    repaint();
+                } catch (FileNotFoundException ex) {
+                    throw new RuntimeException(ex);
                 }
-                ps.setBinaryStream(8, fis, (int) selectedFile.length());
-
-                int affectedRows = ps.executeUpdate();
-                ps1.executeUpdate();
-                if (affectedRows > 0) {
-                    System.out.println("Kullanıcı başarıyla eklendi.");
-                    EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + " " + soyadGiris.getText()
-                            + " !\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
-                } else {
-                    System.out.println("Kullanıcı eklenemedi.");
-                }
-                conn.commit();
-                hastaError = 1;
-                repaint();
-            } catch (SQLException ex) {
-                hastaError = -1;
-                repaint();
-            } catch (FileNotFoundException ex) {
-                throw new RuntimeException(ex);
             }
         } else if (e.getSource() == cikisButton) {
             if(currentScreen == Screen.MAIN){
