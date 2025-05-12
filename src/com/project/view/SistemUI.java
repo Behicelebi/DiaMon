@@ -41,8 +41,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç");
-    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField();
-    JComboBox<String> cinsiyetGiris = new JComboBox<String>();
+    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
+    JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     Date dogumSqlDate = null;
@@ -101,15 +101,63 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         TC_Giris.setBounds(WIDTH/2-115,130,250,20);
         TC_Giris.setFont(new Font("Calibri",Font.PLAIN,15));
         TC_Giris.setVisible(false);
-        TC_Giris.setDocument(new PlainDocument(){
+        TC_Giris.setDocument(new PlainDocument() {
             @Override
-            public void insertString(int offs, String str, AttributeSet a)
-                    throws BadLocationException {
-                if(getLength() + str.length() <= kullanici_limit)
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null) return;
+
+                if (str.matches("\\d+") && getLength() + str.length() <= kullanici_limit) {
                     super.insertString(offs, str, a);
+                }
             }
         });
         this.add(TC_Giris);
+
+        olcumGiris.setPreferredSize(new Dimension(10,300));
+        olcumGiris.setBounds(WIDTH/2-515,130,250,20);
+        olcumGiris.setFont(new Font("Calibri",Font.PLAIN,15));
+        olcumGiris.setVisible(false);
+        olcumGiris.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null) return;
+
+                if (str.matches("\\d+") && getLength() + str.length() <= 7) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+        this.add(olcumGiris);
+
+        belirti_1_giris.setPreferredSize(new Dimension(10,300));
+        belirti_1_giris.setBounds(WIDTH/2-515,180,250,25);
+        belirti_1_giris.setFont(new Font("Calibri",Font.PLAIN,15));
+        belirti_1_giris.setVisible(false);
+        belirti_1_giris.setFocusable(false);
+        belirti_1_giris.addItem("YOK");
+        belirti_1_giris.addItem("Otizim");
+        belirti_1_giris.addItem("Salaklık");
+        this.add(belirti_1_giris);
+
+        belirti_2_giris.setPreferredSize(new Dimension(10,300));
+        belirti_2_giris.setBounds(WIDTH/2-515,235,250,25);
+        belirti_2_giris.setFont(new Font("Calibri",Font.PLAIN,15));
+        belirti_2_giris.setVisible(false);
+        belirti_2_giris.setFocusable(false);
+        belirti_2_giris.addItem("YOK");
+        belirti_2_giris.addItem("Otizim");
+        belirti_1_giris.addItem("Salaklık");
+        this.add(belirti_2_giris);
+
+        belirti_3_giris.setPreferredSize(new Dimension(10,300));
+        belirti_3_giris.setBounds(WIDTH/2-515,285,250,25);
+        belirti_3_giris.setFont(new Font("Calibri",Font.PLAIN,15));
+        belirti_3_giris.setVisible(false);
+        belirti_3_giris.setFocusable(false);
+        belirti_3_giris.addItem("YOK");
+        belirti_3_giris.addItem("Otizim");
+        belirti_1_giris.addItem("Salaklık");
+        this.add(belirti_3_giris);
 
         adGiris.setPreferredSize(new Dimension(10,300));
         adGiris.setBounds(WIDTH/2-115,180,250,20);
@@ -176,7 +224,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(dogumSecimButton);
 
         cinsiyetGiris.setPreferredSize(new Dimension(10,300));
-        cinsiyetGiris.setBounds(WIDTH/2-115,450,250,20);
+        cinsiyetGiris.setBounds(WIDTH/2-115,450,250,25);
         cinsiyetGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         cinsiyetGiris.setVisible(false);
         cinsiyetGiris.setFocusable(false);
@@ -185,14 +233,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(cinsiyetGiris);
 
         profilSecimi.setPreferredSize(new Dimension(10,300));
-        profilSecimi.setBounds(WIDTH/2-115,500,250,20);
+        profilSecimi.setBounds(WIDTH/2-115,505,250,20);
         profilSecimi.setFont(new Font("Calibri",Font.PLAIN,15));
         profilSecimi.setVisible(false);
         profilSecimi.setFocusable(false);
         profilSecimi.addActionListener(this);
         this.add(profilSecimi);
 
-        girisYap.setBounds(WIDTH/2+35,550,100,25);
+        girisYap.setBounds(WIDTH/2+35,555,100,25);
         girisYap.setFont(new Font("Calibri",Font.BOLD,15));
         girisYap.setHorizontalAlignment(SwingConstants.CENTER);
         girisYap.setFocusable(false);
@@ -200,7 +248,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         girisYap.addActionListener(this);
         this.add(girisYap);
 
-        geriButton.setBounds(WIDTH/2-115,550,100,25);
+        geriButton.setBounds(WIDTH/2-115,555,100,25);
         geriButton.setFont(new Font("Calibri",Font.BOLD,15));
         geriButton.setHorizontalAlignment(SwingConstants.CENTER);
         geriButton.setFocusable(false);
@@ -299,6 +347,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         } else if(currentScreen == Screen.HASTA_EKLE){
             g.drawString("HASTA EKLEME",WIDTH/2-40,90);
             g.drawString("TC Kimlik:", WIDTH/2-115,120);
+            g.drawString("Ölçüm Girişi:", WIDTH/2-515,120);
+            g.drawString("Belirti 1:", WIDTH/2-515,170);
+            g.drawString("Belirti 2:", WIDTH/2-515,225);
+            g.drawString("Belirti 3:", WIDTH/2-515,280);
+            g.drawString("mg/dL", WIDTH/2-260,140);
             g.drawString("Ad:", WIDTH/2-115,170);
             g.drawString("Soyad:", WIDTH/2-115,220);
             g.drawString("Şifre:", WIDTH/2-115,270);
@@ -306,14 +359,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Dogum Tarihi:", WIDTH/2-115,370);
             if(dogumSqlDate != null){g.drawString("Seçilen Tarih: " + dogumSqlDate,WIDTH/2-115,420);}
             g.drawString("Cinsiyet:", WIDTH/2-115,440);
-            g.drawString("Profil Resmi:", WIDTH/2-115,490);
-            if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,540);}
+            g.drawString("Profil Resmi:", WIDTH/2-115,495);
+            if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,545);}
             if(hastaError == 1){
                 g.setColor(Color.GREEN);
-                g.drawString("Hasta girişi başarılı", WIDTH/2-115,610);
+                g.drawString("Hasta girişi başarılı", WIDTH/2-115,615);
             } else if (hastaError == -1) {
                 g.setColor(Color.RED);
-                g.drawString("Hasta girişi başarısız", WIDTH/2-115,610);
+                g.drawString("Hasta girişi başarısız", WIDTH/2-115,615);
             }
         } else if (currentScreen == Screen.HASTA_PROFIL) {
             g.setColor(Color.BLUE);
@@ -350,6 +403,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             geriButton.setVisible(true);
             hastaEkle.setVisible(false);
             cikisButton.setVisible(false);
+            olcumGiris.setVisible(true);
+            belirti_1_giris.setVisible(true);
+            belirti_2_giris.setVisible(true);
+            belirti_3_giris.setVisible(true);
             repaint();
         } else if (e.getSource() == geriButton) {
             currentScreen = Screen.MAIN;
@@ -372,6 +429,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             girisYap.setVisible(false);
             geriButton.setVisible(false);
             cikisButton.setVisible(true);
+            olcumGiris.setVisible(false);
+            olcumGiris.setText("");
+            belirti_1_giris.setVisible(false);
+            belirti_2_giris.setVisible(false);
+            belirti_3_giris.setVisible(false);
             hastaError = 0;
             repaint();
         } else if (e.getSource() == profilSecimi) {
@@ -467,21 +529,42 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
             JCalendar calendar = new JCalendar();
             calendar.setDate(selectedDateTime[0]);
+            calendar.setMinSelectableDate(selectedDateTime[0]);
 
             JPanel timePanel = new JPanel();
             Calendar cal = Calendar.getInstance();
             cal.setTime(selectedDateTime[0]);
 
-            SpinnerNumberModel hourModel = new SpinnerNumberModel(cal.get(Calendar.HOUR_OF_DAY), 0, 23, 1);
-            SpinnerNumberModel minuteModel = new SpinnerNumberModel(cal.get(Calendar.MINUTE), 0, 59, 1);
+            Calendar now = Calendar.getInstance();
+            int currentHour = now.get(Calendar.HOUR_OF_DAY);
 
+            int initialHour = now.get(Calendar.HOUR_OF_DAY);
+            SpinnerNumberModel hourModel = new SpinnerNumberModel(initialHour, currentHour, 23, 1);
             JSpinner hourSpinner = new JSpinner(hourModel);
-            JSpinner minuteSpinner = new JSpinner(minuteModel);
+
+            Runnable updateHourModel = () -> {
+                Calendar selected = Calendar.getInstance();
+                selected.setTime(calendar.getDate());
+
+                boolean isToday =
+                        selected.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+                                selected.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
+
+                if (isToday) {
+                    int safeHour = Math.max(currentHour, (int) hourSpinner.getValue());
+                    hourSpinner.setModel(new SpinnerNumberModel(safeHour, currentHour, 23, 1));
+                } else {
+                    int safeHour = (int) hourSpinner.getValue();
+                    hourSpinner.setModel(new SpinnerNumberModel(safeHour, 0, 23, 1));
+                }
+            };
+
+            updateHourModel.run();
+
+            calendar.getDayChooser().addPropertyChangeListener("day", evt -> updateHourModel.run());
 
             timePanel.add(new JLabel("Hour:"));
             timePanel.add(hourSpinner);
-            timePanel.add(new JLabel("Minute:"));
-            timePanel.add(minuteSpinner);
 
             JButton okButton = new JButton("OK");
             okButton.addActionListener(ev -> {
@@ -490,7 +573,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 Calendar newDateTime = Calendar.getInstance();
                 newDateTime.setTime(dateOnly);
                 newDateTime.set(Calendar.HOUR_OF_DAY, (int) hourSpinner.getValue());
-                newDateTime.set(Calendar.MINUTE, (int) minuteSpinner.getValue());
+                newDateTime.set(Calendar.MINUTE, 0);
                 newDateTime.set(Calendar.SECOND, 0);
                 newDateTime.set(Calendar.MILLISECOND, 0);
 

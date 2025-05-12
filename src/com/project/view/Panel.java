@@ -9,9 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -81,6 +79,16 @@ public class Panel extends JPanel implements ActionListener {
                     throws BadLocationException {
                 if(getLength() + str.length() <= kullanici_limit)
                     super.insertString(offs, str, a);
+            }
+        });
+        kullaniciAdiGiris.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null) return;
+
+                if (str.matches("\\d+") && getLength() + str.length() <= kullanici_limit) {
+                    super.insertString(offs, str, a);
+                }
             }
         });
         kullaniciAdiGiris.addKeyListener(new KeyAdapter() {
