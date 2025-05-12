@@ -137,6 +137,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_1_giris.addItem("YOK");
         belirti_1_giris.addItem("Otizim");
         belirti_1_giris.addItem("Salaklık");
+        belirti_1_giris.addItem("Dabet");
+        belirti_1_giris.addActionListener(e -> {
+            if(belirti_1_giris.getSelectedIndex() != 0 && (belirti_1_giris.getSelectedIndex() == belirti_2_giris.getSelectedIndex() || belirti_1_giris.getSelectedIndex() == belirti_3_giris.getSelectedIndex())){belirti_1_giris.setSelectedIndex(0);}
+        });
         this.add(belirti_1_giris);
 
         belirti_2_giris.setPreferredSize(new Dimension(10,300));
@@ -146,7 +150,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_2_giris.setFocusable(false);
         belirti_2_giris.addItem("YOK");
         belirti_2_giris.addItem("Otizim");
-        belirti_1_giris.addItem("Salaklık");
+        belirti_2_giris.addItem("Salaklık");
+        belirti_2_giris.addItem("Dabet");
+        belirti_2_giris.addActionListener(e -> {
+            if(belirti_2_giris.getSelectedIndex() != 0 && (belirti_2_giris.getSelectedIndex() == belirti_1_giris.getSelectedIndex() || belirti_2_giris.getSelectedIndex() == belirti_3_giris.getSelectedIndex())){belirti_2_giris.setSelectedIndex(0);}
+        });
         this.add(belirti_2_giris);
 
         belirti_3_giris.setPreferredSize(new Dimension(10,300));
@@ -156,7 +164,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_3_giris.setFocusable(false);
         belirti_3_giris.addItem("YOK");
         belirti_3_giris.addItem("Otizim");
-        belirti_1_giris.addItem("Salaklık");
+        belirti_3_giris.addItem("Salaklık");
+        belirti_3_giris.addItem("Dabet");
+        belirti_3_giris.addActionListener(e -> {
+            if(belirti_3_giris.getSelectedIndex() != 0 && (belirti_3_giris.getSelectedIndex() == belirti_1_giris.getSelectedIndex() || belirti_3_giris.getSelectedIndex() == belirti_2_giris.getSelectedIndex())){belirti_3_giris.setSelectedIndex(0);}
+        });
         this.add(belirti_3_giris);
 
         adGiris.setPreferredSize(new Dimension(10,300));
@@ -258,7 +270,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     }
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
-                "WHERE tc_no = ? AND sifre_hash = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
+                "WHERE tc_no = ? AND sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
         try (
                 Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
                 PreparedStatement ps = conn.prepareStatement(sql)
@@ -424,6 +436,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dogumSecimButton.setVisible(false);
             dogumSqlDate = null;
             cinsiyetGiris.setVisible(false);
+            cinsiyetGiris.setSelectedIndex(0);
             profilSecimi.setVisible(false);
             selectedFile = null;
             girisYap.setVisible(false);
@@ -432,8 +445,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             olcumGiris.setVisible(false);
             olcumGiris.setText("");
             belirti_1_giris.setVisible(false);
+            belirti_1_giris.setSelectedIndex(0);
             belirti_2_giris.setVisible(false);
+            belirti_2_giris.setSelectedIndex(0);
             belirti_3_giris.setVisible(false);
+            belirti_3_giris.setSelectedIndex(0);
             hastaError = 0;
             repaint();
         } else if (e.getSource() == profilSecimi) {
@@ -469,7 +485,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         } else if (e.getSource() == girisYap) {
             //Bu hata kontrol için sonra test ederim (etmedi)
             if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && dogumSqlDate != null && selectedFile != null) {
-                String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre_hash, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
+                String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                         "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
                 String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)" +
                         "VALUES (?, ?)";
