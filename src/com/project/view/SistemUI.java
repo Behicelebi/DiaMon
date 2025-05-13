@@ -35,6 +35,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Screen currentScreen = Screen.MAIN;
     int WIDTH;
     int HEIGHT;
+    public boolean kimGirdi = false; //false=HASTA, true=DOKTOR
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     Kullanici kullanici;
     Rectangle kullaniciRect = new Rectangle(10,130,700,130);
@@ -135,9 +136,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_1_giris.setVisible(false);
         belirti_1_giris.setFocusable(false);
         belirti_1_giris.addItem("YOK");
-        belirti_1_giris.addItem("Otizim");
-        belirti_1_giris.addItem("Salaklık");
-        belirti_1_giris.addItem("Dabet");
         belirti_1_giris.addActionListener(e -> {
             if(belirti_1_giris.getSelectedIndex() != 0 && (belirti_1_giris.getSelectedIndex() == belirti_2_giris.getSelectedIndex() || belirti_1_giris.getSelectedIndex() == belirti_3_giris.getSelectedIndex())){belirti_1_giris.setSelectedIndex(0);}
         });
@@ -149,9 +147,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_2_giris.setVisible(false);
         belirti_2_giris.setFocusable(false);
         belirti_2_giris.addItem("YOK");
-        belirti_2_giris.addItem("Otizim");
-        belirti_2_giris.addItem("Salaklık");
-        belirti_2_giris.addItem("Dabet");
         belirti_2_giris.addActionListener(e -> {
             if(belirti_2_giris.getSelectedIndex() != 0 && (belirti_2_giris.getSelectedIndex() == belirti_1_giris.getSelectedIndex() || belirti_2_giris.getSelectedIndex() == belirti_3_giris.getSelectedIndex())){belirti_2_giris.setSelectedIndex(0);}
         });
@@ -163,13 +158,25 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         belirti_3_giris.setVisible(false);
         belirti_3_giris.setFocusable(false);
         belirti_3_giris.addItem("YOK");
-        belirti_3_giris.addItem("Otizim");
-        belirti_3_giris.addItem("Salaklık");
-        belirti_3_giris.addItem("Dabet");
         belirti_3_giris.addActionListener(e -> {
             if(belirti_3_giris.getSelectedIndex() != 0 && (belirti_3_giris.getSelectedIndex() == belirti_1_giris.getSelectedIndex() || belirti_3_giris.getSelectedIndex() == belirti_2_giris.getSelectedIndex())){belirti_3_giris.setSelectedIndex(0);}
         });
         this.add(belirti_3_giris);
+
+        String sql = "SELECT tur_adi FROM BELIRTI_TURU ";
+        try (
+                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                belirti_1_giris.addItem(rs.getString("tur_adi"));
+                belirti_2_giris.addItem(rs.getString("tur_adi"));
+                belirti_3_giris.addItem(rs.getString("tur_adi"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
 
         adGiris.setPreferredSize(new Dimension(10,300));
         adGiris.setBounds(WIDTH/2-115,180,250,20);
@@ -286,6 +293,45 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             throw new RuntimeException(e);
         }
 
+        if(kullanici.rol.equals("HASTA")){
+            String sql1 = "SELECT * FROM HASTA_OLCUM WHERE hasta_tc = ?";
+            String sql2 = "SELECT * FROM HASTA_BELIRTI WHERE hasta_tc = ?";
+            String sql3 = "SELECT * FROM BELIRTI_TURU WHERE belirti_turu_id = ?";
+            String sql4 = "SELECT * FROM UYARI_TURU WHERE uyari_turu_id = ?";
+            try (
+                    Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                    PreparedStatement ps = conn.prepareStatement(sql1);
+                    PreparedStatement ps1 = conn.prepareStatement(sql2);
+                    PreparedStatement ps2 = conn.prepareStatement(sql3);
+                    PreparedStatement ps3 = conn.prepareStatement(sql4)
+            ) {
+
+                ps.setString(1, Main.enUserName);
+                ps1.setString(1, Main.enUserName);
+
+                ResultSet rs = ps.executeQuery();
+                while(rs.next()){
+                    kullanici.olcumler.add(rs.getInt("olcum_degeri"));
+                    kullanici.olcumTarihleri.add(rs.getString("olcum_tarihi"));
+                    ps3.setString(1, String.valueOf(rs.getInt("uyari_turu_id")));
+                    ResultSet rs1 = ps3.executeQuery();
+                    rs1.next();
+                    kullanici.olcumUyarilar.add(rs1.getString("tur_adi"));
+                    kullanici.olcumUyariAciklamalar.add(rs1.getString("tur_mesaji"));
+                }
+
+                ResultSet rs1 = ps1.executeQuery();
+                while (rs1.next()){
+                    ps2.setString(1, String.valueOf(rs1.getInt("belirti_turu_id")));
+                    ResultSet rs2 = ps2.executeQuery();
+                    rs2.next();
+                    kullanici.belirtiler.add(rs2.getString("tur_adi"));
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         String sql1 = "";
         if(kullanici.rol.equals("DOKTOR")){
             sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
@@ -306,6 +352,44 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             while(rs1.next()){
                 relations.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
                 relationsRects.add(new Rectangle(10,270 + 140*i,700,130));
+                if(relations.get(i).rol.equals("HASTA")){
+                    String sql2 = "SELECT * FROM HASTA_OLCUM WHERE hasta_tc = ?";
+                    String sql3 = "SELECT * FROM HASTA_BELIRTI WHERE hasta_tc = ?";
+                    String sql4 = "SELECT * FROM BELIRTI_TURU WHERE belirti_turu_id = ?";
+                    String sql5 = "SELECT * FROM UYARI_TURU WHERE uyari_turu_id = ?";
+                    try (
+                            Connection conn1 = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                            PreparedStatement ps2 = conn1.prepareStatement(sql2);
+                            PreparedStatement ps3 = conn1.prepareStatement(sql3);
+                            PreparedStatement ps4 = conn1.prepareStatement(sql4);
+                            PreparedStatement ps5 = conn1.prepareStatement(sql5)
+                    ) {
+
+                        ps2.setString(1, String.valueOf(relations.get(i).tc_no));
+                        ps3.setString(1, String.valueOf(relations.get(i).tc_no));
+
+                        ResultSet rs2 = ps2.executeQuery();
+                        while(rs2.next()){
+                            relations.get(i).olcumler.add(rs2.getInt("olcum_degeri"));
+                            relations.get(i).olcumTarihleri.add(rs2.getString("olcum_tarihi"));
+                            ps5.setString(1, String.valueOf(rs2.getInt("uyari_turu_id")));
+                            ResultSet rs3 = ps5.executeQuery();
+                            rs3.next();
+                            relations.get(i).olcumUyarilar.add(rs3.getString("tur_adi"));
+                            relations.get(i).olcumUyariAciklamalar.add(rs3.getString("tur_mesaji"));
+                        }
+
+                        ResultSet rs3 = ps3.executeQuery();
+                        while (rs3.next()){
+                            ps4.setString(1, String.valueOf(rs3.getInt("belirti_turu_id")));
+                            ResultSet rs4 = ps4.executeQuery();
+                            rs4.next();
+                            relations.get(i).belirtiler.add(rs4.getString("tur_adi"));
+                        }
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
                 i++;
             }
         } catch (SQLException ex) {
@@ -391,6 +475,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Doğum Tarihi: " + relations.get(secilenHasta).dogum_tarihi, 150,210);
             g.drawString("E-Posta: " + relations.get(secilenHasta).email, 150,230);
             g.drawString("Rol: " + relations.get(secilenHasta).rol, 150,250);
+            if(relations.get(secilenHasta).belirtiler.size() > 0){g.drawString("Belirti 1: " + relations.get(secilenHasta).belirtiler.get(0), 20,300);}
+            if(relations.get(secilenHasta).belirtiler.size() > 1){g.drawString("Belirti 2: " + relations.get(secilenHasta).belirtiler.get(1), 20,320);}
+            if(relations.get(secilenHasta).belirtiler.size() > 2){g.drawString("Belirti 3: " + relations.get(secilenHasta).belirtiler.get(2), 20,340);}
+            if(relations.get(secilenHasta).olcumler.size() > 0){g.drawString("Ölçüm: " + relations.get(secilenHasta).olcumler.get(0), 20,360);}
+            if(relations.get(secilenHasta).olcumUyarilar.size() > 0){g.drawString("Uyarı: " + relations.get(secilenHasta).olcumUyarilar.get(0), 20,380);}
         }
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,25));
@@ -489,11 +578,15 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
                 String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)" +
                         "VALUES (?, ?)";
+                String sql2 = "INSERT INTO HASTA_BELIRTI (hasta_tc, belirti_turu_id)" +
+                        "VALUES (?, ?)";
+                String sql3 = "INSERT INTO HASTA_OLCUM (hasta_tc, olcum_tarihi, uyari_turu_id, olcum_degeri)" +
+                        "VALUES (?, ?, ?, ?)";
                 try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
-                     PreparedStatement ps = conn.prepareStatement(sql); PreparedStatement ps1 = conn.prepareStatement(sql1)) {
-
-                    ps1.setString(1, Main.enUserName);
-                    ps1.setString(2, TC_Giris.getText());
+                     PreparedStatement ps = conn.prepareStatement(sql);
+                     PreparedStatement ps1 = conn.prepareStatement(sql1);
+                     PreparedStatement ps2 = conn.prepareStatement(sql2);
+                     PreparedStatement ps3 = conn.prepareStatement(sql3)) {
 
                     FileInputStream fis = new FileInputStream(selectedFile);
                     ps.setString(1, TC_Giris.getText());
@@ -509,9 +602,43 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     }
                     ps.setBinaryStream(8, fis, (int) selectedFile.length());
 
+                    ps1.setString(1, Main.enUserName);
+                    ps1.setString(2, TC_Giris.getText());
+
                     int affectedRows = ps.executeUpdate();
                     ps1.executeUpdate();
                     if (affectedRows > 0) {
+
+                        ps2.setString(1,TC_Giris.getText());
+                        if(belirti_1_giris.getSelectedIndex() != 0){
+                            ps2.setString(2,String.valueOf(belirti_1_giris.getSelectedIndex()));
+                            ps2.executeUpdate();
+                        }
+                        if(belirti_2_giris.getSelectedIndex() != 0){
+                            ps2.setString(2,String.valueOf(belirti_2_giris.getSelectedIndex()));
+                            ps2.executeUpdate();
+                        }
+                        if(belirti_3_giris.getSelectedIndex() != 0){
+                            ps2.setString(2,String.valueOf(belirti_3_giris.getSelectedIndex()));
+                            ps2.executeUpdate();
+                        }
+
+                        ps3.setString(1,TC_Giris.getText());
+                        ps3.setTimestamp(2,new java.sql.Timestamp(selectedDateTime[0].getTime()));
+                        if(Integer.valueOf(olcumGiris.getText()) < 70){
+                            ps3.setString(3,"1");
+                        } else if (Integer.valueOf(olcumGiris.getText()) >= 70 && Integer.valueOf(olcumGiris.getText()) <= 110) {
+                            ps3.setString(3,"2");
+                        } else if (Integer.valueOf(olcumGiris.getText()) >= 111 && Integer.valueOf(olcumGiris.getText()) <= 150) {
+                            ps3.setString(3,"3");
+                        } else if (Integer.valueOf(olcumGiris.getText()) >= 151 && Integer.valueOf(olcumGiris.getText()) <= 200) {
+                            ps3.setString(3,"4");
+                        } else if (Integer.valueOf(olcumGiris.getText()) > 200) {
+                            ps3.setString(3,"5");
+                        }
+                        ps3.setString(4,olcumGiris.getText());
+                        ps3.executeUpdate();
+
                         System.out.println("Kullanıcı başarıyla eklendi.");
                         EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + " " + soyadGiris.getText()
                                 + " !\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
@@ -527,6 +654,9 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
+            } else {
+                hastaError = -1;
+                repaint();
             }
         } else if (e.getSource() == cikisButton) {
             if(currentScreen == Screen.MAIN){

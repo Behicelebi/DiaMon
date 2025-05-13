@@ -1,13 +1,16 @@
 package com.project.view;
 
+import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
@@ -207,6 +210,8 @@ public class Panel extends JPanel implements ActionListener {
 
                     if (rs.next()) {
                         conn.close();
+                        if(secti == 1){Main.frame.sistemUI.kimGirdi = false;}
+                        else if (secti == 2) {Main.frame.sistemUI.kimGirdi = true;}
                         Main.frame.switchScreen(1);
                     } else {
                         conn.close();
