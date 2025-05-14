@@ -13,6 +13,8 @@ public class Kullanici {
     public ArrayList<String> olcumTarihleri = new ArrayList<String>();
     public ArrayList<String> olcumUyarilar = new ArrayList<String>();
     public ArrayList<String> olcumUyariAciklamalar = new ArrayList<String>();
+    public String egzersizOneri, diyetOneri;
+    public int oneriGirdiMi = -1;
 
     public Kullanici(long tc_no, String ad, String soyad, String email, String dogum_tarihi, String cinsiyet, BufferedImage profil_resmi, String rol){
         this.tc_no = tc_no;
