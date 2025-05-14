@@ -147,6 +147,17 @@ public class CreateDatabase {
                             "END";
             stmt.executeUpdate(createHastaEgzersizCheckTable);
 
+            // HASTA_UYARI tablosu
+            String createHastaUyariTable =
+                    "IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HASTA_EGZERSIZ_CHECK' AND xtype='U') " +
+                            "BEGIN CREATE TABLE HASTA_UYARI (" +
+                            "hasta_tc BIGINT NOT NULL, " +
+                            "tarih DATE NOT NULL, " +
+                            "uyari_turu_id INT NOT NULL, " +
+                            "FOREIGN KEY (hasta_tc) REFERENCES KULLANICI(tc_no), " +
+                            "END";
+            stmt.executeUpdate(createHastaUyariTable);
+
             System.out.println("✅ Veritabanı ve tablolar başarıyla kuruldu.");
 
         } catch (Exception e) {
