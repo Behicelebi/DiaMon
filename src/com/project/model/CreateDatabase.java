@@ -154,7 +154,7 @@ public class CreateDatabase {
                             "hasta_tc BIGINT NOT NULL, " +
                             "tarih DATE NOT NULL, " +
                             "uyari_turu_id INT NOT NULL, " +
-                            "FOREIGN KEY (hasta_tc) REFERENCES KULLANICI(tc_no), " +
+                            "FOREIGN KEY (hasta_tc) REFERENCES KULLANICI(tc_no)) " +
                             "END";
             stmt.executeUpdate(createHastaUyariTable);
 
