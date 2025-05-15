@@ -83,7 +83,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         hastaEkle.setVisible(false);
                         secilenHasta = i;
                         for (int j = 0; j < relations.get(secilenHasta).olcumler.size(); j++) {
-                            olcumSecme.addItem(String.valueOf(relations.get(secilenHasta).olcumler.get(j)));
+                            String eklencekString = String.valueOf(relations.get(secilenHasta).olcumler.get(j)) + " -> " + relations.get(secilenHasta).olcumTarihleri.get(j);
+                            olcumSecme.addItem(eklencekString);
                         }
                         if(relations.get(secilenHasta).oneriGirdiMi == 0){oneriYap.setVisible(true);}
                         onerilenDiyet = "Yok";
@@ -641,7 +642,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             olcumSecme.removeAllItems();
             olcumSecme.setVisible(true);
             for (int j = 0; j < kullanici.olcumler.size(); j++) {
-                olcumSecme.addItem(String.valueOf(kullanici.olcumler.get(j)));
+                String eklencekString = String.valueOf(kullanici.olcumler.get(j)) + " -> " + kullanici.olcumTarihleri.get(j);
+                olcumSecme.addItem(eklencekString);
             }
             olcumGiris.setVisible(true);
             olcumGiris.setText("");
@@ -1131,7 +1133,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         ps.setString(4,olcumGiris.getText());
                         ps.executeUpdate();
                         conn.commit();
-                        olcumSecme.addItem(olcumGiris.getText());
                         initialize();
                         olcumGirildiMi = 1;
                         repaint();
