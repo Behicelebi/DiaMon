@@ -63,7 +63,7 @@ public class FillDatabaseTables {
     }
 
     private void addDiyetTypes(Connection conn) throws SQLException {
-        String[] diyetTurleri = {"Az Şekerli Diyet", "Şekerli Diyet", "Dengeli Beslenme"};
+        String[] diyetTurleri = {"Az Şekerli Diyet", "Şekersiz Diyet", "Dengeli Beslenme"};
 
         for (String tur : diyetTurleri) {
             String sql = "IF NOT EXISTS (SELECT * FROM DIYET_TURU WHERE tur_adi = ?) " +

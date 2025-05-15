@@ -35,7 +35,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Screen currentScreen = Screen.MAIN;
     int WIDTH;
     int HEIGHT;
-    public boolean kimGirdi = false; //false=HASTA, true=DOKTOR
+    public boolean doktorMu = false; //false=HASTA, true=DOKTOR
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     Kullanici kullanici;
     Rectangle kullaniciRect = new Rectangle(10,130,700,130);
@@ -46,6 +46,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), olcumSecme = new JComboBox<>();
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
+    final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
     Date dogumSqlDate = null;
     final int kullanici_limit = 11, sifre_limit = 15;
     int hastaError = 0;
@@ -171,7 +172,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
         String sql = "SELECT tur_adi FROM BELIRTI_TURU ";
         try (
-                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password); //ADMIN GIRISI
                 PreparedStatement ps = conn.prepareStatement(sql)
         ) {
             ResultSet rs = ps.executeQuery();
@@ -309,8 +310,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
+        String username = doktorMu ? doktorUser : hastaUser;
+        String password = doktorMu ? doktorPassword : hastaPassword;
         try (
-                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                Connection conn = DriverManager.getConnection(Main.url, username, password); // BOOLEAN
                 PreparedStatement ps = conn.prepareStatement(sql)
         ) {
             ps.setString(1, Main.enUserName);
@@ -332,7 +335,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             String sql5 = "SELECT D.tur_adi FROM HASTA_DIYET H, DIYET_TURU D WHERE H.hasta_tc = ? AND H.diyet_turu_id = D.diyet_turu_id";
             String sql6 = "SELECT E.tur_adi FROM HASTA_EGZERSIZ H, EGZERSIZ_TURU E WHERE H.hasta_tc = ? AND H.egzersiz_turu_id = E.egzersiz_turu_id";
             try (
-                    Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                    Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); //HASTA GIRISI
                     PreparedStatement ps = conn.prepareStatement(sql1);
                     PreparedStatement ps1 = conn.prepareStatement(sql2);
                     PreparedStatement ps2 = conn.prepareStatement(sql3);
@@ -417,7 +420,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     "WHERE K.tc_no = H.doktor_tc AND H.hasta_tc = ?";
         }
         try (
-                Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                Connection conn = DriverManager.getConnection(Main.url, username, password); // boolean
                 PreparedStatement ps = conn.prepareStatement(sql1);
         ) {
             ps.setString(1,Main.enUserName);
@@ -436,7 +439,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     String sql6 = "SELECT D.tur_adi FROM HASTA_DIYET H, DIYET_TURU D WHERE H.hasta_tc = ? AND H.diyet_turu_id = D.diyet_turu_id";
                     String sql7 = "SELECT E.tur_adi FROM HASTA_EGZERSIZ H, EGZERSIZ_TURU E WHERE H.hasta_tc = ? AND H.egzersiz_turu_id = E.egzersiz_turu_id";
                     try (
-                            Connection conn1 = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                            Connection conn1 = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); //HASTA GIRISI
                             PreparedStatement ps2 = conn1.prepareStatement(sql2);
                             PreparedStatement ps3 = conn1.prepareStatement(sql3);
                             PreparedStatement ps4 = conn1.prepareStatement(sql4);
@@ -782,7 +785,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         "VALUES (?, ?)";
                 String sql3 = "INSERT INTO HASTA_OLCUM (hasta_tc, olcum_tarihi, uyari_turu_id, olcum_degeri)" +
                         "VALUES (?, ?, ?, ?)";
-                try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                try (Connection conn = DriverManager.getConnection(Main.url, doktorUser, doktorPassword); //DOKTOR
                      PreparedStatement ps = conn.prepareStatement(sql);
                      PreparedStatement ps1 = conn.prepareStatement(sql1);
                      PreparedStatement ps2 = conn.prepareStatement(sql2);
@@ -942,7 +945,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         } else if (e.getSource() == olcumGir) {
             String sql = "INSERT INTO HASTA_OLCUM (hasta_tc, olcum_tarihi, uyari_turu_id, olcum_degeri)" +
                     "VALUES (?, ?, ?, ?)";
-            try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+            try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
                 ps.setString(1, String.valueOf(kullanici.tc_no));
@@ -972,7 +975,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     "VALUES (?, ?)";
             String sql1 = "INSERT INTO HASTA_DIYET (hasta_tc, diyet_turu_id)" +
                     "VALUES (?, ?)";
-            try (Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+            try (Connection conn = DriverManager.getConnection(Main.url, doktorUser, doktorPassword); //DOKTOR GIRISI
                  PreparedStatement ps = conn.prepareStatement(sql);
                  PreparedStatement ps1 = conn.prepareStatement(sql1)) {
 
@@ -1023,7 +1026,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             String sql2 = "SELECT D.tur_adi FROM HASTA_DIYET H, DIYET_TURU D WHERE H.hasta_tc = ? AND H.diyet_turu_id = D.diyet_turu_id";
             String sql3 = "SELECT E.tur_adi FROM HASTA_EGZERSIZ H, EGZERSIZ_TURU E WHERE H.hasta_tc = ? AND H.egzersiz_turu_id = E.egzersiz_turu_id";
             try (
-                    Connection conn = DriverManager.getConnection(Main.url, Main.username, Main.password);
+                    Connection conn = DriverManager.getConnection(Main.url, doktorUser, doktorPassword); // DOKTOR
                     PreparedStatement ps = conn.prepareStatement(sql2);
                     PreparedStatement ps1 = conn.prepareStatement(sql3);
             ) {

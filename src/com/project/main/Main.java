@@ -1,6 +1,7 @@
 package com.project.main;
 
 import com.project.model.CreateDatabase;
+import com.project.model.CreateUsers;
 import com.project.model.FillDatabaseTables;
 import com.project.view.Frame;
 
@@ -13,6 +14,7 @@ public class Main {
     public static void main(String[] args) {
         new CreateDatabase();
         new FillDatabaseTables();
+        new CreateUsers();
         frame = new Frame();
     }
 }
