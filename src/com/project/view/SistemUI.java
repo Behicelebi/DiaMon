@@ -757,7 +757,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             if(relations.get(secilenHasta).belirtiler.size() > 2){g.drawString("Belirti 3: " + relations.get(secilenHasta).belirtiler.get(2), 20,340);}
             g.drawString("Ölçüm Seç: ", 20,360);
             if(relations.get(secilenHasta).olcumTarihleri.size() > 0){g.drawString("Ölçüm Tarihi: " + relations.get(secilenHasta).olcumTarihleri.get(olcumSecme.getSelectedIndex()), 20,410);}
-            if(relations.get(secilenHasta).olcumUyarilar.size() > 0){g.drawString(relations.get(secilenHasta).olcumUyarilar.get(olcumSecme.getSelectedIndex()) + ": " + relations.get(secilenHasta).olcumUyariAciklamalar.get(0), 20,430);}
+            if(relations.get(secilenHasta).olcumUyarilar.size() > 0){g.drawString(relations.get(secilenHasta).olcumUyarilar.get(olcumSecme.getSelectedIndex()) + ": " + relations.get(secilenHasta).olcumUyariAciklamalar.get(olcumSecme.getSelectedIndex()), 20,430);}
             g.drawString("Önerilen Diyet: " + onerilenDiyet, 20,470);
             g.drawString("Önerilen Egzersiz: " + onerilenEgzersiz, 20,490);
             g.drawString("Diyet Geçmişi:", 20,520);
