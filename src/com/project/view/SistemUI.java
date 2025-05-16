@@ -43,7 +43,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
-    JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), olcumSecme = new JComboBox<>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>();
+    JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), olcumSecme = new JComboBox<>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), uyariGecmis = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
@@ -89,55 +89,72 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         if(relations.get(secilenHasta).oneriGirdiMi == 0){oneriYap.setVisible(true);}
                         onerilenDiyet = "Yok";
                         onerilenEgzersiz = "Yok";
-                        if(relations.get(secilenHasta).olcumler.get(0) < 70){
-                            if(relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
-                                onerilenDiyet = "Dengeli Beslenme";
+                        String sql = "SELECT * FROM DIYET_TURU WHERE diyet_turu_id = ?";
+                        String sql1 = "SELECT * FROM EGZERSIZ_TURU WHERE egzersiz_turu_id = ?";
+                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                             PreparedStatement ps = conn.prepareStatement(sql);
+                             PreparedStatement ps1 = conn.prepareStatement(sql1)){
+                            ps.setString(1,"0");
+                            ps1.setString(1,"0");
+                            if(relations.get(secilenHasta).olcumler.get(0) < 70){
+                                if(relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
+                                    ps.setString(1,"3");
+                                }
+                            } else if (relations.get(secilenHasta).olcumler.get(0) >= 70 && relations.get(secilenHasta).olcumler.get(0) < 110) {
+                                if(relations.get(secilenHasta).belirtiler.contains("Kilo Kaybı") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
+                                    ps.setString(1,"1");
+                                    ps1.setString(1,"1");
+                                }
+                                if (relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
+                                    ps.setString(1,"3");
+                                    ps1.setString(1,"1");
+                                }
+                            } else if (relations.get(secilenHasta).olcumler.get(0) >= 110 && relations.get(secilenHasta).olcumler.get(0) < 180) {
+                                if(relations.get(secilenHasta).belirtiler.contains("Bulanık Görme") && relations.get(secilenHasta).belirtiler.contains("Nöropati")){
+                                    ps.setString(1,"1");
+                                    ps1.setString(1,"3");
+                                }
+                                if (relations.get(secilenHasta).belirtiler.contains("Poliüri") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
+                                    ps.setString(1,"2");
+                                    ps1.setString(1,"3");
+                                }
+                                if (relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk") && relations.get(secilenHasta).belirtiler.contains("Bulanık Görme")) {
+                                    ps.setString(1,"1");
+                                    ps1.setString(1,"1");
+                                }
+                            } else if (relations.get(secilenHasta).olcumler.get(0) >= 180) {
+                                if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
+                                    ps.setString(1,"2");
+                                    ps1.setString(1,"3");
+                                }
+                                if (relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
+                                    ps.setString(1,"2");
+                                    ps1.setString(1,"1");
+                                }
                             }
-                        } else if (relations.get(secilenHasta).olcumler.get(0) >= 70 && relations.get(secilenHasta).olcumler.get(0) < 110) {
-                            if(relations.get(secilenHasta).belirtiler.contains("Kilo Kaybı") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
-                                onerilenDiyet = "Az Şekerli Diyet";
-                                onerilenEgzersiz = "Yürüyüş";
-                            }
-                            if (relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                onerilenDiyet = "Dengeli Beslenme";
-                                onerilenEgzersiz = "Yürüyüş";
-                            }
-                        } else if (relations.get(secilenHasta).olcumler.get(0) >= 110 && relations.get(secilenHasta).olcumler.get(0) < 180) {
-                            if(relations.get(secilenHasta).belirtiler.contains("Bulanık Görme") && relations.get(secilenHasta).belirtiler.contains("Nöropati")){
-                                onerilenDiyet = "Az Şekerli Diyet";
-                                onerilenEgzersiz = "Klinik Egzersiz";
-                            }
-                            if (relations.get(secilenHasta).belirtiler.contains("Poliüri") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                onerilenDiyet = "Şekersiz Diyet";
-                                onerilenEgzersiz = "Klinik Egzersiz";
-                            }
-                            if (relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk") && relations.get(secilenHasta).belirtiler.contains("Bulanık Görme")) {
-                                onerilenDiyet = "Az Şekerli Diyet";
-                                onerilenEgzersiz = "Yürüyüş";
-                            }
-                        } else if (relations.get(secilenHasta).olcumler.get(0) >= 180) {
-                            if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
-                                onerilenDiyet = "Şekersiz Diyet";
-                                onerilenEgzersiz = "Klinik Egzersiz";
-                            }
-                            if (relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                onerilenDiyet = "Şekersiz Diyet";
-                                onerilenEgzersiz = "Yürüyüş";
-                            }
+                            ResultSet rs = ps.executeQuery();
+                            ResultSet rs1 = ps1.executeQuery();
+                            if(rs.next()){onerilenDiyet = rs.getString("tur_adi");}
+                            if(rs1.next()){onerilenEgzersiz = rs1.getString("tur_adi");}
+                        } catch (SQLException ex) {
+                            throw new RuntimeException(ex);
                         }
                         diyetGecmis.setVisible(true);
                         egzersizGecmis.setVisible(true);
-                        String sql = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ?";
-                        String sql1 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ?";
+                        uyariGecmis.setVisible(true);
+                        String sql2 = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ?";
+                        String sql3 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ?";
+                        String sql4 = "SELECT * FROM HASTA_UYARI H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id = H.uyari_turu_id";
                         try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                             PreparedStatement ps = conn.prepareStatement(sql);
-                             PreparedStatement ps1 = conn.prepareStatement(sql1)) {
+                             PreparedStatement ps = conn.prepareStatement(sql2);
+                             PreparedStatement ps1 = conn.prepareStatement(sql3);
+                             PreparedStatement ps2 = conn.prepareStatement(sql4)) {
                             ps.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
                             ResultSet rs = ps.executeQuery();
                             while(rs.next()){
                                 String insertedString;
-                                if(rs.getBoolean("yapildi_mi")){insertedString = rs.getString("tarih") + " -> YAPILDI";}
-                                else{insertedString = rs.getString("tarih") + " -> YAPILMADI";}
+                                if(rs.getBoolean("yapildi_mi")){insertedString = rs.getString("tarih") + " -> UYGULANDI";}
+                                else{insertedString = rs.getString("tarih") + " -> UYGULANMADI";}
                                 diyetGecmis.addItem(insertedString);
                             }
                             ps1.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
@@ -147,6 +164,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                                 if(rs1.getBoolean("yapildi_mi")){insertedString = rs1.getString("tarih") + " -> YAPILDI";}
                                 else{insertedString = rs1.getString("tarih") + " -> YAPILMADI";}
                                 egzersizGecmis.addItem(insertedString);
+                            }
+                            ps2.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
+                            ResultSet rs2 = ps2.executeQuery();
+                            while(rs2.next()){
+                                String insertedString = rs2.getString("tarih") + " -> " + rs2.getString("tur_adi");
+                                uyariGecmis.addItem(insertedString);
                             }
                         } catch (SQLException ex) {
                             ex.printStackTrace();
@@ -409,6 +432,13 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         egzersizGecmis.setVisible(false);
         egzersizGecmis.setFocusable(false);
         this.add(egzersizGecmis);
+
+        uyariGecmis.setPreferredSize(new Dimension(10,300));
+        uyariGecmis.setBounds(20,620,250,25);
+        uyariGecmis.setFont(new Font("Calibri",Font.PLAIN,15));
+        uyariGecmis.setVisible(false);
+        uyariGecmis.setFocusable(false);
+        this.add(uyariGecmis);
     }
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
@@ -762,6 +792,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Önerilen Egzersiz: " + onerilenEgzersiz, 20,490);
             g.drawString("Diyet Geçmişi:", 20,520);
             g.drawString("Egzersiz Geçmişi:", 20,570);
+            g.drawString("Günlük Uyarı Geçmişi:", 20,615);
         }
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,25));
@@ -974,8 +1005,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 hastaEkle.setVisible(true);
                 diyetGecmis.setVisible(false);
                 egzersizGecmis.setVisible(false);
+                uyariGecmis.setVisible(false);
                 diyetGecmis.removeAllItems();
                 egzersizGecmis.removeAllItems();
+                uyariGecmis.removeAllItems();
                 cikisButton.setText("Çıkış Yap");
                 currentScreen = Screen.MAIN;
                 repaint();
@@ -1034,56 +1067,90 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 newDateTime.set(Calendar.SECOND, 0);
                 newDateTime.set(Calendar.MILLISECOND, 0);
 
-                //KONTROL
                 if(kullanici.rol.equals("HASTA")){
-                    String sql = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? AND tarih = ?";
-                    String sql2 = "INSERT INTO HASTA_DIYET_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
-                    try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                        PreparedStatement ps = conn.prepareStatement(sql);
-                         PreparedStatement ps1 = conn.prepareStatement(sql2)) {
-                        ps.setString(1, String.valueOf(kullanici.tc_no));
-                        ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
-                        ResultSet rs = ps.executeQuery();
-                        if(rs.next()){}
-                        else {
-                            ps1.setString(1,String.valueOf(kullanici.tc_no));
-                            ps1.setString(2,String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
-                            ps1.setString(3,"0");
-                            ps1.executeUpdate();
-                            conn.commit();
-                        }
-                        Date insertedDate = newDateTime.getTime();
-                        ps.setString(2, String.valueOf(new java.sql.Timestamp(insertedDate.getTime())));
-                        rs = ps.executeQuery();
-                        if(rs.next()){diyetYap.setVisible(false);}
-                        else{diyetYap.setVisible(true);}
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                    Date insertedDate = newDateTime.getTime();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    if(!sdf.format(selectedDateTime[0]).equals(sdf.format(newDateTime.getTime()))){
 
-                    String sql3 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ? AND tarih = ?";
-                    String sql4 = "INSERT INTO HASTA_EGZERSIZ_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
-                    try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                         PreparedStatement ps = conn.prepareStatement(sql3);
-                         PreparedStatement ps1 = conn.prepareStatement(sql4)) {
-                        ps.setString(1, String.valueOf(kullanici.tc_no));
-                        ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
-                        ResultSet rs = ps.executeQuery();
-                        if(rs.next()){}
-                        else {
-                            ps1.setString(1,String.valueOf(kullanici.tc_no));
-                            ps1.setString(2,String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
-                            ps1.setString(3,"0");
-                            ps1.executeUpdate();
-                            conn.commit();
+                        //DIYET KONTROL
+                        String sql = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? AND tarih = ?";
+                        String sql2 = "INSERT INTO HASTA_DIYET_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
+                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                             PreparedStatement ps = conn.prepareStatement(sql);
+                             PreparedStatement ps1 = conn.prepareStatement(sql2)) {
+                            ps.setString(1, String.valueOf(kullanici.tc_no));
+                            ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                            ResultSet rs = ps.executeQuery();
+                            if(rs.next()){}
+                            else {
+                                ps1.setString(1,String.valueOf(kullanici.tc_no));
+                                ps1.setString(2,String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                                ps1.setString(3,"0");
+                                ps1.executeUpdate();
+                                conn.commit();
+                            }
+                            ps.setString(2, String.valueOf(new java.sql.Timestamp(insertedDate.getTime())));
+                            ResultSet rs1 = ps.executeQuery();
+                            if(rs1.next()){diyetYap.setVisible(false);}
+                            else{diyetYap.setVisible(true);}
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
                         }
-                        Date insertedDate = newDateTime.getTime();
-                        ps.setString(2, String.valueOf(new java.sql.Timestamp(insertedDate.getTime())));
-                        rs = ps.executeQuery();
-                        if(rs.next()){egzersizYap.setVisible(false);}
-                        else{egzersizYap.setVisible(true);}
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+
+                        //EGZERSIZ KONTROL
+                        String sql3 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ? AND tarih = ?";
+                        String sql4 = "INSERT INTO HASTA_EGZERSIZ_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
+                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                             PreparedStatement ps = conn.prepareStatement(sql3);
+                             PreparedStatement ps1 = conn.prepareStatement(sql4)) {
+                            ps.setString(1, String.valueOf(kullanici.tc_no));
+                            ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                            ResultSet rs = ps.executeQuery();
+                            if(rs.next()){}
+                            else {
+                                ps1.setString(1,String.valueOf(kullanici.tc_no));
+                                ps1.setString(2,String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                                ps1.setString(3,"0");
+                                ps1.executeUpdate();
+                                conn.commit();
+                            }
+                            ps.setString(2, String.valueOf(new java.sql.Timestamp(insertedDate.getTime())));
+                            ResultSet rs1 = ps.executeQuery();
+                            if(rs1.next()){egzersizYap.setVisible(false);}
+                            else{egzersizYap.setVisible(true);}
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+
+                        //GUNLUK OLCUM KONTROL
+                        String sql5 = "SELECT hasta_tc, olcum_tarihi FROM HASTA_OLCUM WHERE hasta_tc = ? AND CAST(olcum_tarihi AS DATE) = ?";
+                        String sql6 = "INSERT INTO HASTA_UYARI (hasta_tc, tarih, uyari_turu_id) VALUES (?, ?, ?)";
+                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                             PreparedStatement ps = conn.prepareStatement(sql5);) {
+                            ps.setString(1, String.valueOf(kullanici.tc_no));
+                            ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                            ResultSet rs = ps.executeQuery();
+                            int olcumSayisi = 0;
+                            while(rs.next()){olcumSayisi++;}
+                            try (Connection conn1 = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                                 PreparedStatement ps1 = conn1.prepareStatement(sql6)){
+                                ps1.setString(1,String.valueOf(kullanici.tc_no));
+                                ps1.setString(2,String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
+                                if(olcumSayisi == 0){
+                                    ps1.setString(3,"6");
+                                    ps1.executeUpdate();
+                                    conn1.commit();
+                                } else if (olcumSayisi < 3) {
+                                    ps1.setString(3,"7");
+                                    ps1.executeUpdate();
+                                    conn1.commit();
+                                }
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                            }
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 } else if (kullanici.rol.equals("DOKTOR")) {
 

@@ -88,7 +88,7 @@ public class CreateUsers {
             stmt.executeUpdate("GRANT SELECT ON HASTA_DOKTOR TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON HASTA_DIYET TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON HASTA_EGZERSIZ TO hasta_role");
-            stmt.executeUpdate("GRANT SELECT ON HASTA_UYARI TO hasta_role");
+            stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_UYARI TO hasta_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_DIYET_CHECK TO hasta_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_EGZERSIZ_CHECK TO hasta_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_BELIRTI TO hasta_role");
