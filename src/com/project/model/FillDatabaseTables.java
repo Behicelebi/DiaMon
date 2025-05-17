@@ -98,7 +98,10 @@ public class FillDatabaseTables {
                 {"İzleme Uyarısı", "Hastanın kan şekeri 151-200 mg/dL arasında. Diyabet kontrolü gereklidir."},
                 {"Acil Müdahale Uyarısı","Hastanın kan şekeri 200 mg/dL'nin üzerinde. Hiperglisemi durumu. Acil müdahale gerekebilir."},
                 {"Ölçüm Eksik Uyarısı","Hasta gün boyunca kan şekeri ölçümü yapmamıştır. Acil takip önerilir"},
-                {"Ölçüm Yetersiz Uyarısı","Hastanın günlük kan şekeri ölçüm sayısı yetersiz (ölçüm < 3). Durum izlenmelidir."}
+                {"Ölçüm Yetersiz Uyarısı","Hastanın günlük kan şekeri ölçüm sayısı yetersiz (ölçüm < 3). Durum izlenmelidir."},
+                {"Veri Yok Uyarısı","Öneri verisi bulunmamakta! Ölçümlerinizi zamanında yapınız."},
+                {"Eksik Veri Uyarısı","Eksik ölçüm(ler) bulunmakta! Ortalama hesaplanırken bu değer(ler) kullanılamadı."},
+                {"Yetersiz Veri Uyarısı","Yetersiz veri! Ortalama hesaplaması güvenilir değildir."}
         };
 
         for (String[] uyari : uyariTurleri) {

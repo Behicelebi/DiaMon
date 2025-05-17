@@ -78,6 +78,7 @@ public class CreateUsers {
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_EGZERSIZ TO doktor_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_EGZERSIZ_CHECK TO doktor_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_UYARI TO doktor_role");
+            stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_INSULIN TO doktor_role");
             stmt.executeUpdate("GRANT SELECT ON BELIRTI_TURU TO doktor_role");
             stmt.executeUpdate("GRANT SELECT ON DIYET_TURU TO doktor_role");
             stmt.executeUpdate("GRANT SELECT ON EGZERSIZ_TURU TO doktor_role");
@@ -93,6 +94,7 @@ public class CreateUsers {
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_EGZERSIZ_CHECK TO hasta_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_BELIRTI TO hasta_role");
             stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_OLCUM TO hasta_role");
+            stmt.executeUpdate("GRANT SELECT, INSERT ON HASTA_INSULIN TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON BELIRTI_TURU TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON DIYET_TURU TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON EGZERSIZ_TURU TO hasta_role");

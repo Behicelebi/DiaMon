@@ -158,6 +158,19 @@ public class CreateDatabase {
                             "END";
             stmt.executeUpdate(createHastaUyariTable);
 
+            // HASTA_INSULIN tablosu
+            String createHastaInsulinTable =
+                    "IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HASTA_INSULIN' AND xtype='U') " +
+                            "BEGIN CREATE TABLE HASTA_INSULIN (" +
+                            "hasta_tc BIGINT NOT NULL, " +
+                            "insulin_tarihi DATETIME NOT NULL, " +
+                            "uyari_turu_id INT NOT NULL, " +
+                            "insulin_degeri INT NOT NULL, " +
+                            "FOREIGN KEY (hasta_tc) REFERENCES KULLANICI(tc_no), " +
+                            "FOREIGN KEY (uyari_turu_id) REFERENCES UYARI_TURU(uyari_turu_id))" +
+                            "END";
+            stmt.executeUpdate(createHastaInsulinTable);
+
             System.out.println("✅ Veritabanı ve tablolar başarıyla kuruldu.");
 
         } catch (Exception e) {
