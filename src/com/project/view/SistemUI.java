@@ -52,14 +52,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
     Date dogumSqlDate = null;
-    final int kullanici_limit = 11, sifre_limit = 15;
-    int hastaError = 0;
-    int secilenHasta = 0;
+    int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, onerilenInsulin = 0;
+    String insulinError = "Uyarı Yok";
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
     String onerilenDiyet = "Yok", onerilenEgzersiz = "Yok";
-    int olcumGirildiMi = -1;
 
     SistemUI(int WIDTH, int HEIGHT){
         this.WIDTH = WIDTH;
@@ -75,6 +73,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         selectedDateTime = new Date[]{cal.getTime()};
+        onerilenInsulin = 0;
+        String insulinError = "Uyarı Yok";
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -699,27 +699,27 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             olcumGiris.setText("");
             olcumGiris.setBounds(20,555,250,20);
             olcumGir.setVisible(true);
-            if(kullanici.diyetOneri != null){
+            if(!kullanici.diyetOneri.equals("Yok")){
                 String sql2 = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? AND tarih = ?";
                 try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                      PreparedStatement ps = conn.prepareStatement(sql2);) {
                     ps.setString(1, String.valueOf(kullanici.tc_no));
                     ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
                     ResultSet rs = ps.executeQuery();
-                    if(rs.next()){}
+                    if(rs.next()){diyetYap.setVisible(false);}
                     else {diyetYap.setVisible(true);}
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             }
-            if(kullanici.egzersizOneri != null){
+            if(!kullanici.egzersizOneri.equals("Yok")){
                 String sql2 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ? AND tarih = ?";
                 try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                      PreparedStatement ps = conn.prepareStatement(sql2);) {
                     ps.setString(1, String.valueOf(kullanici.tc_no));
                     ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
                     ResultSet rs = ps.executeQuery();
-                    if(rs.next()){}
+                    if(rs.next()){egzersizYap.setVisible(false);}
                     else {egzersizYap.setVisible(true);}
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -834,12 +834,85 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 g.drawString("Ölçüm Girilemedi", 450,570);
             }
             g.setColor(Color.WHITE);
-            if(kullanici.egzersizOneri != null){g.drawString("Önerilen Egzersiz: " + kullanici.egzersizOneri, 20,610);}
-            if(kullanici.diyetOneri != null){g.drawString("Önerilen Diyet: " + kullanici.diyetOneri, 20,640);}
+            g.drawString("Önerilen Egzersiz: " + kullanici.egzersizOneri, 20,610);
+            g.drawString("Önerilen Diyet: " + kullanici.diyetOneri, 20,640);
         }
     }
 
-    public void insulinCheck(){}
+    public void insulinCheck(LocalDateTime ldt, LocalDateTime ldt2){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+        HashMap<Integer, Integer> indexes = new HashMap<Integer, Integer>();
+        int hours[] = new int[]{7,12,15,18,22};
+        for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
+            LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
+            if(dateTime.getDayOfMonth() == ldt.getDayOfMonth() && (dateTime.getHour() == 7 || dateTime.getHour() == 12 || dateTime.getHour() == 15 || dateTime.getHour() == 18 || dateTime.getHour() == 22)){indexes.put(dateTime.getHour(),i);}
+        }
+        String sql = "INSERT INTO HASTA_INSULIN (hasta_tc, insulin_tarihi, uyari_turu_id, insulin_degeri) VALUES (?, ?, ?, ?)";
+        String sql1 = "SELECT * FROM HASTA_INSULIN WHERE hasta_tc = ? AND insulin_tarihi = ?";
+        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+             PreparedStatement ps = conn.prepareStatement(sql);
+             PreparedStatement ps1 = conn.prepareStatement(sql1)){
+
+            ps.setString(1, String.valueOf(kullanici.tc_no));
+
+            ps1.setString(1,String.valueOf(kullanici.tc_no));
+            for (int i = 0; i < hours.length; i++) {
+                ps1.setString(2, String.valueOf(Timestamp.valueOf(ldt.withHour(hours[i]))));
+                ResultSet rs = ps1.executeQuery();
+                if(rs.next()){}
+                else {
+                    if(ldt2.getDayOfMonth() > ldt.getDayOfMonth() || ldt2.getHour() > hours[i]){
+                        ps.setTimestamp(2,Timestamp.valueOf(ldt.withHour(hours[i])));
+                        int sum = 0, acc = 0;
+                        for (int j = i; j >= 0; j--) {
+                            if(indexes.containsKey(hours[j])){
+                                sum += kullanici.olcumler.get(indexes.get(hours[j]));
+                                acc++;
+                            }
+                        }
+
+                        if(acc == i+1){ps.setString(3, "2");}
+                        else if (acc == 0) {ps.setString(3, "8");}
+                        else {
+                            if(indexes.containsKey(hours[i])){ps.setString(3, "9");}
+                            else {ps.setString(3, "10");}
+                        }
+
+                        if(acc != 0){
+                            if(sum/acc <= 110){ps.setString(4, "0");}
+                            else if(sum/acc >= 111 && sum/acc <= 150){ps.setString(4, "1");}
+                            else if(sum/acc >= 151 && sum/acc <= 200){ps.setString(4, "2");}
+                            else if(sum/acc > 200){ps.setString(4, "3");}
+                        } else {
+                            ps.setString(4, "0");
+                        }
+
+                        ps.executeUpdate();
+                        conn.commit();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        String sql2 = "SELECT * FROM HASTA_INSULIN H, UYARI_TURU U WHERE H.hasta_tc = ? AND H.insulin_tarihi = ? AND U.uyari_turu_id = H.uyari_turu_id";
+        try(Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+            PreparedStatement ps = conn.prepareStatement(sql2)) {
+            ps.setString(1, String.valueOf(kullanici.tc_no));
+            for (int i = 0; i < hours.length-1; i++) {
+                if(ldt.getHour() >= hours[i] && ldt.getHour() < hours[i+1]){ps.setTimestamp(2, Timestamp.valueOf(ldt.withHour(hours[i])));}
+            }
+            if(ldt.getHour() >= 22){ps.setTimestamp(2, Timestamp.valueOf(ldt.withHour(22)));}
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                onerilenInsulin = rs.getInt("insulin_degeri");
+                insulinError = rs.getString("tur_adi");
+                repaint();
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -1040,38 +1113,40 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             JDialog dialog = new JDialog(Main.frame, "Gün ve Saat Seç", true);
             dialog.setLayout(new BorderLayout());
 
+            Date initialDate = selectedDateTime[0];
+            Calendar initialCal = Calendar.getInstance();
+            initialCal.setTime(initialDate);
+            int initialHourLimit = initialCal.get(Calendar.HOUR_OF_DAY);
+
             JCalendar calendar = new JCalendar();
-            calendar.setDate(selectedDateTime[0]);
-            calendar.setMinSelectableDate(selectedDateTime[0]);
+            calendar.setDate(initialDate);
+            calendar.setMinSelectableDate(initialDate);
 
             JPanel timePanel = new JPanel();
 
-            Calendar now = Calendar.getInstance();
-            int currentHour = now.get(Calendar.HOUR_OF_DAY);
-
-            int initialHour = now.get(Calendar.HOUR_OF_DAY);
-            SpinnerNumberModel hourModel = new SpinnerNumberModel(initialHour, currentHour, 23, 1);
+            SpinnerNumberModel hourModel = new SpinnerNumberModel(initialHourLimit, initialHourLimit, 23, 1);
             JSpinner hourSpinner = new JSpinner(hourModel);
 
             Runnable updateHourModel = () -> {
                 Calendar selected = Calendar.getInstance();
                 selected.setTime(calendar.getDate());
 
-                boolean isToday =
-                        selected.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
-                                selected.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
+                boolean isSameDay =
+                        selected.get(Calendar.YEAR) == initialCal.get(Calendar.YEAR) &&
+                                selected.get(Calendar.DAY_OF_YEAR) == initialCal.get(Calendar.DAY_OF_YEAR);
 
-                if (isToday) {
-                    int safeHour = Math.max(currentHour, (int) hourSpinner.getValue());
-                    hourSpinner.setModel(new SpinnerNumberModel(safeHour, currentHour, 23, 1));
+                int currentSpinnerValue = (int) hourSpinner.getValue();
+
+                if (isSameDay) {
+                    int safeHour = Math.max(initialHourLimit, currentSpinnerValue);
+                    hourSpinner.setModel(new SpinnerNumberModel(safeHour, initialHourLimit, 23, 1));
                 } else {
-                    int safeHour = (int) hourSpinner.getValue();
+                    int safeHour = Math.max(0, currentSpinnerValue);
                     hourSpinner.setModel(new SpinnerNumberModel(safeHour, 0, 23, 1));
                 }
             };
 
             updateHourModel.run();
-
             calendar.getDayChooser().addPropertyChangeListener("day", evt -> updateHourModel.run());
 
             timePanel.add(new JLabel("Saat:"));
@@ -1173,65 +1248,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                             ex.printStackTrace();
                         }
                     }
+
                     //INSULIN ONERISI
                     if(!selectedDateTime[0].equals(newDateTime.getTime())){
                         LocalDateTime ldt = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                         LocalDateTime ldt2 = newDateTime.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                        HashMap<Integer, Integer> indexes = new HashMap<Integer, Integer>();
-                        int hours[] = new int[]{7,12,15,18,22};
-                        for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
-                            LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
-                            if(dateTime.getDayOfMonth() == ldt.getDayOfMonth() && (dateTime.getHour() == 7 || dateTime.getHour() == 12 || dateTime.getHour() == 15 || dateTime.getHour() == 18 || dateTime.getHour() == 22)){indexes.put(dateTime.getHour(),i);}
-                        }
-                        String sql = "INSERT INTO HASTA_INSULIN (hasta_tc, insulin_tarihi, uyari_turu_id, insulin_degeri) VALUES (?, ?, ?, ?)";
-                        String sql1 = "SELECT * FROM HASTA_INSULIN WHERE hasta_tc = ? AND insulin_tarihi = ?";
-                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                             PreparedStatement ps = conn.prepareStatement(sql);
-                             PreparedStatement ps1 = conn.prepareStatement(sql1)){
-
-                            ps.setString(1, String.valueOf(kullanici.tc_no));
-
-                            ps1.setString(1,String.valueOf(kullanici.tc_no));
-                            for (int i = 0; i < hours.length; i++) {
-                                ps1.setString(2, String.valueOf(Timestamp.valueOf(ldt.withHour(hours[i]))));
-                                ResultSet rs = ps1.executeQuery();
-                                if(rs.next()){System.out.println("yes");}
-                                else {
-                                    if(ldt2.getDayOfMonth() > ldt.getDayOfMonth() || ldt2.getHour() > hours[i]){
-                                        ps.setTimestamp(2,Timestamp.valueOf(ldt.withHour(hours[i])));
-                                        int sum = 0, acc = 0;
-                                        for (int j = i; j >= 0; j--) {
-                                            if(indexes.containsKey(hours[j])){
-                                                sum += kullanici.olcumler.get(indexes.get(hours[j]));
-                                                acc++;
-                                            }
-                                        }
-
-                                        if(acc == i+1){ps.setString(3, "2");}
-                                        else if (acc == 0) {ps.setString(3, "8");}
-                                        else {
-                                            if(indexes.containsKey(hours[i])){ps.setString(3, "9");}
-                                            else {ps.setString(3, "10");}
-                                        }
-
-                                        if(acc != 0){
-                                            if(sum/acc <= 110){ps.setString(4, "0");}
-                                            else if(sum/acc >= 111 && sum/acc <= 150){ps.setString(4, "1");}
-                                            else if(sum/acc >= 151 && sum/acc <= 200){ps.setString(4, "2");}
-                                            else if(sum/acc > 200){ps.setString(4, "3");}
-                                        } else {
-                                            ps.setString(4, "0");
-                                        }
-
-                                        ps.executeUpdate();
-                                        conn.commit();
-                                    }
-                                }
-                            }
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
+                        insulinCheck(ldt, ldt2);
                     }
                 } else if (kullanici.rol.equals("DOKTOR")) {
 
@@ -1283,6 +1305,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         conn.commit();
                         initialize();
                         olcumGirildiMi = 1;
+                        LocalDateTime ldt = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        insulinCheck(ldt, ldt);
                         repaint();
                     } catch (SQLException ex) {
                         throw new RuntimeException(ex);
