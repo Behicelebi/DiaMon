@@ -21,8 +21,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.Date;
 
@@ -43,7 +47,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
-    JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), olcumSecme = new JComboBox<>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), uyariGecmis = new JComboBox<String>();
+    JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), olcumSecme = new JComboBox<>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), uyariGecmis = new JComboBox<String>(), insulinGecmis = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
@@ -83,7 +87,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         hastaEkle.setVisible(false);
                         secilenHasta = i;
                         for (int j = 0; j < relations.get(secilenHasta).olcumler.size(); j++) {
-                            String eklencekString = String.valueOf(relations.get(secilenHasta).olcumler.get(j)) + " -> " + relations.get(secilenHasta).olcumTarihleri.get(j);
+                            String eklencekString = String.valueOf(relations.get(secilenHasta).olcumler.get(j)) + " mg/dL -> " + relations.get(secilenHasta).olcumTarihleri.get(j);
                             olcumSecme.addItem(eklencekString);
                         }
                         if(relations.get(secilenHasta).oneriGirdiMi == 0){oneriYap.setVisible(true);}
@@ -123,13 +127,13 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                                     ps1.setString(1,"1");
                                 }
                             } else if (relations.get(secilenHasta).olcumler.get(0) >= 180) {
-                                if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
-                                    ps.setString(1,"2");
-                                    ps1.setString(1,"3");
-                                }
                                 if (relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
                                     ps.setString(1,"2");
                                     ps1.setString(1,"1");
+                                }
+                                if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
+                                    ps.setString(1,"2");
+                                    ps1.setString(1,"3");
                                 }
                             }
                             ResultSet rs = ps.executeQuery();
@@ -142,13 +146,16 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         diyetGecmis.setVisible(true);
                         egzersizGecmis.setVisible(true);
                         uyariGecmis.setVisible(true);
+                        insulinGecmis.setVisible(true);
                         String sql2 = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ?";
                         String sql3 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ?";
                         String sql4 = "SELECT * FROM HASTA_UYARI H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id = H.uyari_turu_id";
+                        String sql5 = "SELECT * FROM HASTA_INSULIN H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id = H.uyari_turu_id";
                         try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                              PreparedStatement ps = conn.prepareStatement(sql2);
                              PreparedStatement ps1 = conn.prepareStatement(sql3);
-                             PreparedStatement ps2 = conn.prepareStatement(sql4)) {
+                             PreparedStatement ps2 = conn.prepareStatement(sql4);
+                             PreparedStatement ps3 = conn.prepareStatement(sql5)) {
                             ps.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
                             ResultSet rs = ps.executeQuery();
                             while(rs.next()){
@@ -170,6 +177,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                             while(rs2.next()){
                                 String insertedString = rs2.getString("tarih") + " -> " + rs2.getString("tur_adi");
                                 uyariGecmis.addItem(insertedString);
+                            }
+                            ps3.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
+                            ResultSet rs3 = ps3.executeQuery();
+                            while(rs3.next()){
+                                String insertedString = rs3.getString("insulin_tarihi") + " -> " + rs3.getString("insulin_degeri") + " ml (" + rs3.getString("tur_adi") + ")";
+                                insulinGecmis.addItem(insertedString);
                             }
                         } catch (SQLException ex) {
                             ex.printStackTrace();
@@ -218,7 +231,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(TC_Giris);
 
         olcumGiris.setPreferredSize(new Dimension(10,300));
-        olcumGiris.setBounds(WIDTH/2-515,130,250,20);
+        olcumGiris.setBounds(WIDTH/2-515,105,250,20);
         olcumGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         olcumGiris.setVisible(false);
         olcumGiris.setDocument(new PlainDocument() {
@@ -281,14 +294,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             ex.printStackTrace();
         }
 
-        olcumGir.setBounds(330,580,120,20);
+        olcumGir.setBounds(330,555,120,20);
         olcumGir.setFont(new Font("Calibri",Font.BOLD,15));
         olcumGir.setHorizontalAlignment(SwingConstants.CENTER);
         olcumGir.setFocusable(false);
         olcumGir.addActionListener(this);
         this.add(olcumGir);
 
-        diyetYap.setBounds(330,620,120,20);
+        diyetYap.setBounds(330,595,120,20);
         diyetYap.setFont(new Font("Calibri",Font.BOLD,15));
         diyetYap.setHorizontalAlignment(SwingConstants.CENTER);
         diyetYap.setFocusable(false);
@@ -296,7 +309,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         diyetYap.addActionListener(this);
         this.add(diyetYap);
 
-        egzersizYap.setBounds(330,650,120,20);
+        egzersizYap.setBounds(330,625,120,20);
         egzersizYap.setFont(new Font("Calibri",Font.BOLD,15));
         egzersizYap.setHorizontalAlignment(SwingConstants.CENTER);
         egzersizYap.setFocusable(false);
@@ -304,7 +317,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         egzersizYap.addActionListener(this);
         this.add(egzersizYap);
 
-        oneriYap.setBounds(20,510,100,20);
+        oneriYap.setBounds(20,480,100,20);
         oneriYap.setFont(new Font("Calibri",Font.BOLD,15));
         oneriYap.setHorizontalAlignment(SwingConstants.CENTER);
         oneriYap.setVisible(false);
@@ -410,7 +423,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(geriButton);
 
         olcumSecme.setPreferredSize(new Dimension(10,300));
-        olcumSecme.setBounds(20,370,250,25);
+        olcumSecme.setBounds(20,370,260,25);
         olcumSecme.setFont(new Font("Calibri",Font.PLAIN,15));
         olcumSecme.setVisible(false);
         olcumSecme.setFocusable(false);
@@ -420,25 +433,32 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(olcumSecme);
 
         diyetGecmis.setPreferredSize(new Dimension(10,300));
-        diyetGecmis.setBounds(20,530,250,25);
+        diyetGecmis.setBounds(20,540,260,25);
         diyetGecmis.setFont(new Font("Calibri",Font.PLAIN,15));
         diyetGecmis.setVisible(false);
         diyetGecmis.setFocusable(false);
         this.add(diyetGecmis);
 
         egzersizGecmis.setPreferredSize(new Dimension(10,300));
-        egzersizGecmis.setBounds(20,575,250,25);
+        egzersizGecmis.setBounds(20,585,260,25);
         egzersizGecmis.setFont(new Font("Calibri",Font.PLAIN,15));
         egzersizGecmis.setVisible(false);
         egzersizGecmis.setFocusable(false);
         this.add(egzersizGecmis);
 
         uyariGecmis.setPreferredSize(new Dimension(10,300));
-        uyariGecmis.setBounds(20,620,250,25);
+        uyariGecmis.setBounds(20,630,260,25);
         uyariGecmis.setFont(new Font("Calibri",Font.PLAIN,15));
         uyariGecmis.setVisible(false);
         uyariGecmis.setFocusable(false);
         this.add(uyariGecmis);
+
+        insulinGecmis.setPreferredSize(new Dimension(10,300));
+        insulinGecmis.setBounds(20,675,260,25);
+        insulinGecmis.setFont(new Font("Calibri",Font.PLAIN,15));
+        insulinGecmis.setVisible(false);
+        insulinGecmis.setFocusable(false);
+        this.add(insulinGecmis);
     }
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
@@ -677,7 +697,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
             olcumGiris.setVisible(true);
             olcumGiris.setText("");
-            olcumGiris.setBounds(20,580,250,20);
+            olcumGiris.setBounds(20,555,250,20);
             olcumGir.setVisible(true);
             if(kullanici.diyetOneri != null){
                 String sql2 = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? AND tarih = ?";
@@ -785,14 +805,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             if(relations.get(secilenHasta).belirtiler.size() > 0){g.drawString("Belirti 1: " + relations.get(secilenHasta).belirtiler.get(0), 20,300);}
             if(relations.get(secilenHasta).belirtiler.size() > 1){g.drawString("Belirti 2: " + relations.get(secilenHasta).belirtiler.get(1), 20,320);}
             if(relations.get(secilenHasta).belirtiler.size() > 2){g.drawString("Belirti 3: " + relations.get(secilenHasta).belirtiler.get(2), 20,340);}
-            g.drawString("Ölçüm Seç: ", 20,360);
-            if(relations.get(secilenHasta).olcumTarihleri.size() > 0){g.drawString("Ölçüm Tarihi: " + relations.get(secilenHasta).olcumTarihleri.get(olcumSecme.getSelectedIndex()), 20,410);}
-            if(relations.get(secilenHasta).olcumUyarilar.size() > 0){g.drawString(relations.get(secilenHasta).olcumUyarilar.get(olcumSecme.getSelectedIndex()) + ": " + relations.get(secilenHasta).olcumUyariAciklamalar.get(olcumSecme.getSelectedIndex()), 20,430);}
-            g.drawString("Önerilen Diyet: " + onerilenDiyet, 20,470);
-            g.drawString("Önerilen Egzersiz: " + onerilenEgzersiz, 20,490);
-            g.drawString("Diyet Geçmişi:", 20,520);
-            g.drawString("Egzersiz Geçmişi:", 20,570);
-            g.drawString("Günlük Uyarı Geçmişi:", 20,615);
+            g.drawString("Ölçüm Geçmişi: ", 20,360);
+            if(relations.get(secilenHasta).olcumUyarilar.size() > 0){g.drawString(relations.get(secilenHasta).olcumUyarilar.get(olcumSecme.getSelectedIndex()) + ": " + relations.get(secilenHasta).olcumUyariAciklamalar.get(olcumSecme.getSelectedIndex()), 20,410);}
+            g.drawString("Önerilen Diyet: " + onerilenDiyet, 20,450);
+            g.drawString("Önerilen Egzersiz: " + onerilenEgzersiz, 20,470);
+            g.drawString("Diyet Geçmişi:", 20,530);
+            g.drawString("Egzersiz Geçmişi:", 20,580);
+            g.drawString("Günlük Uyarı Geçmişi:", 20,625);
+            g.drawString("İnsülin Geçmişi:",20,670);
         }
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,25));
@@ -804,21 +824,22 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             if(kullanici.belirtiler.size() > 1){g.drawString("Belirti 2: " + kullanici.belirtiler.get(1), 20,450);}
             if(kullanici.belirtiler.size() > 2){g.drawString("Belirti 3: " + kullanici.belirtiler.get(2), 20,470);}
             g.drawString("Ölçüm Seç: ", 20,490);
-            if(kullanici.olcumTarihleri.size() > 0){g.drawString("Ölçüm Tarihi: " + kullanici.olcumTarihleri.get(olcumSecme.getSelectedIndex()), 20,540);}
-            g.drawString("Ölçüm Giriş: ", 20,565);
-            g.drawString("mg/dL", 280,595);
+            g.drawString("Ölçüm Giriş: ", 20,540);
+            g.drawString("mg/dL", 280,570);
             if(olcumGirildiMi == 1){
                 g.setColor(Color.GREEN);
-                g.drawString("Ölçüm Girildi", 450,595);
+                g.drawString("Ölçüm Girildi", 450,570);
             } else if(olcumGirildiMi == 0){
                 g.setColor(Color.RED);
-                g.drawString("Ölçüm Girilemedi", 450,595);
+                g.drawString("Ölçüm Girilemedi", 450,570);
             }
             g.setColor(Color.WHITE);
-            if(kullanici.egzersizOneri != null){g.drawString("Önerilen Egzersiz: " + kullanici.egzersizOneri, 20,630);}
-            if(kullanici.diyetOneri != null){g.drawString("Önerilen Diyet: " + kullanici.diyetOneri, 20,660);}
+            if(kullanici.egzersizOneri != null){g.drawString("Önerilen Egzersiz: " + kullanici.egzersizOneri, 20,610);}
+            if(kullanici.diyetOneri != null){g.drawString("Önerilen Diyet: " + kullanici.diyetOneri, 20,640);}
         }
     }
+
+    public void insulinCheck(){}
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -1006,9 +1027,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 diyetGecmis.setVisible(false);
                 egzersizGecmis.setVisible(false);
                 uyariGecmis.setVisible(false);
+                insulinGecmis.setVisible(false);
                 diyetGecmis.removeAllItems();
                 egzersizGecmis.removeAllItems();
                 uyariGecmis.removeAllItems();
+                insulinGecmis.removeAllItems();
                 cikisButton.setText("Çıkış Yap");
                 currentScreen = Screen.MAIN;
                 repaint();
@@ -1022,8 +1045,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             calendar.setMinSelectableDate(selectedDateTime[0]);
 
             JPanel timePanel = new JPanel();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(selectedDateTime[0]);
 
             Calendar now = Calendar.getInstance();
             int currentHour = now.get(Calendar.HOUR_OF_DAY);
@@ -1152,6 +1173,66 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                             ex.printStackTrace();
                         }
                     }
+                    //INSULIN ONERISI
+                    if(!selectedDateTime[0].equals(newDateTime.getTime())){
+                        LocalDateTime ldt = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        LocalDateTime ldt2 = newDateTime.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                        HashMap<Integer, Integer> indexes = new HashMap<Integer, Integer>();
+                        int hours[] = new int[]{7,12,15,18,22};
+                        for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
+                            LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
+                            if(dateTime.getDayOfMonth() == ldt.getDayOfMonth() && (dateTime.getHour() == 7 || dateTime.getHour() == 12 || dateTime.getHour() == 15 || dateTime.getHour() == 18 || dateTime.getHour() == 22)){indexes.put(dateTime.getHour(),i);}
+                        }
+                        String sql = "INSERT INTO HASTA_INSULIN (hasta_tc, insulin_tarihi, uyari_turu_id, insulin_degeri) VALUES (?, ?, ?, ?)";
+                        String sql1 = "SELECT * FROM HASTA_INSULIN WHERE hasta_tc = ? AND insulin_tarihi = ?";
+                        try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                             PreparedStatement ps = conn.prepareStatement(sql);
+                             PreparedStatement ps1 = conn.prepareStatement(sql1)){
+
+                            ps.setString(1, String.valueOf(kullanici.tc_no));
+
+                            ps1.setString(1,String.valueOf(kullanici.tc_no));
+                            for (int i = 0; i < hours.length; i++) {
+                                ps1.setString(2, String.valueOf(Timestamp.valueOf(ldt.withHour(hours[i]))));
+                                ResultSet rs = ps1.executeQuery();
+                                if(rs.next()){System.out.println("yes");}
+                                else {
+                                    if(ldt2.getDayOfMonth() > ldt.getDayOfMonth() || ldt2.getHour() > hours[i]){
+                                        ps.setTimestamp(2,Timestamp.valueOf(ldt.withHour(hours[i])));
+                                        int sum = 0, acc = 0;
+                                        for (int j = i; j >= 0; j--) {
+                                            if(indexes.containsKey(hours[j])){
+                                                sum += kullanici.olcumler.get(indexes.get(hours[j]));
+                                                acc++;
+                                            }
+                                        }
+
+                                        if(acc == i+1){ps.setString(3, "2");}
+                                        else if (acc == 0) {ps.setString(3, "8");}
+                                        else if (acc == 1) {
+                                            if(indexes.containsKey(hours[i])){ps.setString(3, "9");}
+                                            else {ps.setString(3, "10");}
+                                        }
+
+                                        if(acc != 0){
+                                            if(sum/acc <= 110){ps.setString(4, "0");}
+                                            else if(sum/acc >= 111 && sum/acc <= 150){ps.setString(4, "1");}
+                                            else if(sum/acc >= 151 && sum/acc <= 200){ps.setString(4, "2");}
+                                            else if(sum/acc > 200){ps.setString(4, "3");}
+                                        } else {
+                                            ps.setString(4, "0");
+                                        }
+
+                                        ps.executeUpdate();
+                                        conn.commit();
+                                    }
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 } else if (kullanici.rol.equals("DOKTOR")) {
 
                 }
@@ -1249,13 +1330,13 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         ps.setString(2,"1");
                     }
                 } else if (relations.get(secilenHasta).olcumler.get(0) >= 180) {
-                    if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
-                        ps1.setString(2,"2");
-                        ps.setString(2,"3");
-                    }
                     if (relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
                         ps1.setString(2,"2");
                         ps.setString(2,"1");
+                    }
+                    if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
+                        ps1.setString(2,"2");
+                        ps.setString(2,"3");
                     }
                 }
                 ps.executeUpdate();
@@ -1284,8 +1365,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 ex.printStackTrace();
             }
         } else if(e.getSource() == diyetYap){
-            String sql = "INSERT INTO HASTA_DIYET_CHECK (hasta_tc, tarih, yapildi_mi)" +
-                    "VALUES (?, ?, ?)";
+            String sql = "INSERT INTO HASTA_DIYET_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
             try (
                     Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                     PreparedStatement ps = conn.prepareStatement(sql);
@@ -1300,8 +1380,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 ex.printStackTrace();
             }
         } else if (e.getSource() == egzersizYap) {
-            String sql = "INSERT INTO HASTA_EGZERSIZ_CHECK (hasta_tc, tarih, yapildi_mi)" +
-                    "VALUES (?, ?, ?)";
+            String sql = "INSERT INTO HASTA_EGZERSIZ_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
             try (
                     Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
                     PreparedStatement ps = conn.prepareStatement(sql);
