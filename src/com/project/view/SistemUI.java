@@ -1210,7 +1210,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
                                         if(acc == i+1){ps.setString(3, "2");}
                                         else if (acc == 0) {ps.setString(3, "8");}
-                                        else if (acc == 1) {
+                                        else {
                                             if(indexes.containsKey(hours[i])){ps.setString(3, "9");}
                                             else {ps.setString(3, "10");}
                                         }
