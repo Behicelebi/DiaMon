@@ -42,7 +42,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     public boolean doktorMu = false; //false=HASTA, true=DOKTOR
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     Kullanici kullanici;
-    Rectangle kullaniciRect = new Rectangle(10,130,700,130);
+    Rectangle kullaniciRect = new Rectangle(14,130,620,130);
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap");
@@ -80,7 +80,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             @Override
             public void mouseClicked(MouseEvent e){
                 for (int i = 0; i< relationsRects.size(); i++) {
-                    if (relationsRects.get(i).contains(e.getPoint()) && relationsRects.get(i).y > 130 && kullanici.rol.equals("DOKTOR") && currentScreen == Screen.MAIN) {
+                    if (relationsRects.get(i).contains(e.getPoint()) && relationsRects.get(i).y >= 130 && kullanici.rol.equals("DOKTOR") && currentScreen == Screen.MAIN) {
                         currentScreen = Screen.HASTA_PROFIL;
                         cikisButton.setText("Geri");
                         olcumSecme.setVisible(true);
@@ -207,7 +207,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         selectDate.addActionListener(this);
         this.add(selectDate);
 
-        hastaEkle.setBounds(1100,300,100,20);
+        hastaEkle.setBounds(520,145,100,20);
         hastaEkle.setFont(new Font("Calibri",Font.BOLD,15));
         hastaEkle.setHorizontalAlignment(SwingConstants.CENTER);
         hastaEkle.setFocusable(false);
@@ -583,7 +583,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             int i = 0;
             while(rs1.next()){
                 relations.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
-                relationsRects.add(new Rectangle(10,270 + 140*i,700,130));
+                relationsRects.add(new Rectangle(646,270 + 140*(i-1),620,130));
                 if(relations.get(i).rol.equals("HASTA")){
                     String sql2 = "SELECT * FROM HASTA_OLCUM WHERE hasta_tc = ?";
                     String sql3 = "SELECT * FROM HASTA_BELIRTI WHERE hasta_tc = ?";
@@ -733,6 +733,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     }
     public void draw(Graphics g){
 
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
         g.setColor(Color.WHITE);
 
@@ -740,25 +742,31 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
             for (int i = 0; i < relations.size(); i++) {
                 if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.BLUE);}
-                else if (kullanici.rol.equals("HASTA")){g.setColor(Color.RED);}
+                else if (kullanici.rol.equals("HASTA")){g.setColor(new Color(3, 92, 0));}
                 g.fillRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height);
                 g.setColor(Color.WHITE);
-                g.drawImage(relations.get(i).profil_resmi,20, relationsRects.get(i).y + 20,this);
-                g.drawString("Ad Soyad: " + relations.get(i).ad + " " + relations.get(i).soyad, 150, relationsRects.get(i).y + 20);
-                g.drawString("TC Kimlik: " + relations.get(i).tc_no, 150, relationsRects.get(i).y + 40);
-                g.drawString("Cinsiyet: " + relations.get(i).cinsiyet, 150, relationsRects.get(i).y + 60);
-                g.drawString("Doğum Tarihi: " + relations.get(i).dogum_tarihi, 150, relationsRects.get(i).y + 80);
-                g.drawString("E-Posta: " + relations.get(i).email, 150, relationsRects.get(i).y + 100);
-                g.drawString("Rol: " + relations.get(i).rol, 150, relationsRects.get(i).y + 120);
+                g.drawImage(relations.get(i).profil_resmi,660, relationsRects.get(i).y + 20,this);
+                g.drawString("Ad Soyad: " + relations.get(i).ad + " " + relations.get(i).soyad, 786, relationsRects.get(i).y + 20);
+                g.drawString("TC Kimlik: " + relations.get(i).tc_no, 786, relationsRects.get(i).y + 40);
+                g.drawString("Cinsiyet: " + relations.get(i).cinsiyet, 786, relationsRects.get(i).y + 60);
+                g.drawString("Doğum Tarihi: " + relations.get(i).dogum_tarihi, 786, relationsRects.get(i).y + 80);
+                g.drawString("E-Posta: " + relations.get(i).email, 786, relationsRects.get(i).y + 100);
+                g.drawString("Rol: " + relations.get(i).rol, 786, relationsRects.get(i).y + 120);
             }
 
             g.setColor(Color.BLACK);
-            g.fillRect(0,0,WIDTH,kullaniciRect.height + kullaniciRect.y);
+            g.fillRect(0,0,WIDTH,130);
+            float[] dashPattern = {6, 4};
+            g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            g2d.setColor(Color.WHITE);
+            g2d.drawLine(2,124,WIDTH,124);
+            g2d.drawLine(640, 128, 640, HEIGHT);
+            g2d.setStroke(new BasicStroke());
 
-            if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.RED);}
+            if (kullanici.rol.equals("DOKTOR")) {g.setColor(new Color(3, 92, 0));}
             else if (kullanici.rol.equals("HASTA")){g.setColor(Color.BLUE);}
             g.fillRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height);
-            g.drawImage(kullanici.profil_resmi,20,150,this);
+            g.drawImage(kullanici.profil_resmi,28,150,this);
             g.setColor(Color.WHITE);
             g.drawString("Ad Soyad: " + kullanici.ad + " " + kullanici.soyad, 150,150);
             g.drawString("TC Kimlik: " + kullanici.tc_no, 150,170);
@@ -815,8 +823,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("İnsülin Geçmişi:",20,670);
         }
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Consolas",Font.PLAIN,25));
-        g.drawString("Diyabet Sistemi",550,40);
+        g.setFont(new Font("Consolas",Font.BOLD,30));
+        g.drawString("Diyabet Sistemi",513,70);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
         g.drawString("Current Date: " + formatter.format(selectedDateTime[0]), 960,40);
         if(kullanici.rol.equals("HASTA")){
@@ -1424,14 +1432,22 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int notches = e.getWheelRotation();
-        if(relationsRects.size() != 0 && currentScreen == Screen.MAIN){
-            if((relationsRects.get(0).y >= 270 && notches > 0) || relationsRects.get(0).y != 270){
-                if((relationsRects.get(relationsRects.size()-1).y >= 270 && notches < 0) || relationsRects.get(relationsRects.size()-1).y != 270){
-                    for (int i = 0; i < relationsRects.size(); i++) {
-                        relationsRects.get(i).y -= notches*20;
-                        repaint();
-                    }
+        if (!relationsRects.isEmpty() && currentScreen == Screen.MAIN) {
+            Rectangle firstRect = relationsRects.get(0);
+            Rectangle lastRect = relationsRects.get(relationsRects.size() - 1);
+
+            int itemHeight = 130;
+            int upperLimit = 130;  // İlk kutu en fazla bu kadar yukarıda olabilir
+            int lowerLimit = 720;  // Son kutu en az bu kadar aşağıda olabilir
+
+            boolean canScrollDown = firstRect.y <= upperLimit && notches > 0 && lastRect.y + 130 >= lowerLimit;
+            boolean canScrollUp = firstRect.y < upperLimit && notches < 0 && lastRect.y + 150 >= lowerLimit;
+
+            if (canScrollDown || canScrollUp) {
+                for (Rectangle rect : relationsRects) {
+                    rect.y -= notches * 20;
                 }
+                repaint();
             }
         }
     }
