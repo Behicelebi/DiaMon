@@ -18,7 +18,8 @@ public class Kullanici {
     public ArrayList<String> insulinUyarilar = new ArrayList<String>();
     public ArrayList<String> insulinUyariAciklamalar = new ArrayList<String>();
     public String egzersizOneri = "Yok", diyetOneri = "Yok";
-    public int oneriGirdiMi = -1, diyetYuzdesi = 0, egzersizYuzdesi = 0;
+    public boolean oneriGirdiMi = false;
+    public int diyetYuzdesi = 0, egzersizYuzdesi = 0;
 
     public Kullanici(long tc_no, String ad, String soyad, String email, String dogum_tarihi, String cinsiyet, BufferedImage profil_resmi, String rol){
         this.tc_no = tc_no;
