@@ -1223,6 +1223,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             JCalendar calendar = new JCalendar();
             calendar.setDate(initialDate);
             calendar.setMinSelectableDate(initialDate);
+            LocalDateTime ldt_temp = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            Calendar temp = Calendar.getInstance();
+            temp.set(Calendar.DAY_OF_MONTH, ldt_temp.getDayOfMonth()+1);
+            calendar.setMaxSelectableDate(new java.sql.Date(temp.getTimeInMillis()));
 
             JPanel timePanel = new JPanel();
 
