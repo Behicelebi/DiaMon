@@ -395,7 +395,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         ResultSet rs = ps.executeQuery();
                         boolean flag = false;
                         while(rs.next()){
-                            if(rs.getString("tarih").equals(String.valueOf(tarihSec.getSelectedItem()))){
+                            if(rs.getString("tarih").equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                                 if(rs.getBoolean("yapildi_mi")){diyetYapildi = 1;}
                                 else {diyetYapildi = 0;}
                                 flag=true;
@@ -408,7 +408,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         rs = ps1.executeQuery();
                         flag = false;
                         while(rs.next()){
-                            if(rs.getString("tarih").equals(String.valueOf(tarihSec.getSelectedItem()))){
+                            if(rs.getString("tarih").equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                                 if(rs.getBoolean("yapildi_mi")){egzersizYapildi = 1;}
                                 else {egzersizYapildi = 0;}
                                 flag=true;
@@ -423,7 +423,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         try (Connection conn = DriverManager.getConnection(Main.url, doktorUser, doktorPassword); // DOKTOR
                              PreparedStatement ps2 = conn.prepareStatement(sql5);) {
                             ps2.setString(1, String.valueOf(relations.get(secilenHasta).tc_no));
-                            ps2.setDate(2, java.sql.Date.valueOf(String.valueOf(tarihSec.getSelectedItem())));
+                            ps2.setDate(2, java.sql.Date.valueOf(tarihReformat(String.valueOf(tarihSec.getSelectedItem()))));
                             ResultSet rs2 = ps2.executeQuery();
                             gunlukUyari = "";
                             if(rs2.next()){gunlukUyari = rs2.getString("tur_adi");}
@@ -480,14 +480,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         XYSeries series = new XYSeries("Kan Şekeri");
         if(kullanici.rol.equals("HASTA")){
             for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
-                if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+                if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                     LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
                     series.add(dateTime.getHour(), kullanici.olcumler.get(i));
                 }
             }
         }else if (kullanici.rol.equals("DOKTOR")){
             for (int i = 0; i < relations.get(secilenHasta).olcumTarihleri.size(); i++) {
-                if(relations.get(secilenHasta).olcumTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+                if(relations.get(secilenHasta).olcumTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                     LocalDateTime dateTime = LocalDateTime.parse(relations.get(secilenHasta).olcumTarihleri.get(i), formatter);
                     series.add(dateTime.getHour(), relations.get(secilenHasta).olcumler.get(i));
                 }
@@ -508,7 +508,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     }
 
     public void initialize(){
-        String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
+        String sql = "SELECT tc_no, ad, soyad, email, FORMAT(dogum_tarihi, 'dd-MM-yyyy') AS dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
         String username = doktorMu ? doktorUser : hastaUser;
         String password = doktorMu ? doktorPassword : hastaPassword;
@@ -533,10 +533,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
         String sql1 = "";
         if(kullanici.rol.equals("DOKTOR")){
-            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
+            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, FORMAT(K.dogum_tarihi, 'dd-MM-yyyy') AS dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
                     "WHERE K.tc_no = H.hasta_tc AND H.doktor_tc = ? ORDER BY K.ad, K.soyad";
         } else if (kullanici.rol.equals("HASTA")) {
-            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, K.dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
+            sql1 = "SELECT K.tc_no, K.ad, K.soyad, K.email, FORMAT(K.dogum_tarihi, 'dd-MM-yyyy') AS dogum_tarihi, K.cinsiyet, K.profil_resmi, K.rol FROM KULLANICI K, HASTA_DOKTOR H " +
                     "WHERE K.tc_no = H.doktor_tc AND H.hasta_tc = ? ORDER BY K.ad, K.soyad";
         }
         try (
@@ -617,7 +617,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 ps.setString(1, String.valueOf(kullanici.tc_no));
                 ResultSet rs = ps.executeQuery();
                 while(rs.next()){
-                    if(rs.getString("tarih").equals(String.valueOf(tarihSec.getSelectedItem()))){
+                    if(rs.getString("tarih").equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                         if(rs.getBoolean("yapildi_mi")){diyetYapildi = 1;}
                         else {diyetYapildi = 0;}
                     }
@@ -625,7 +625,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 ps1.setString(1, String.valueOf(kullanici.tc_no));
                 rs = ps1.executeQuery();
                 while(rs.next()){
-                    if(rs.getString("tarih").equals(String.valueOf(tarihSec.getSelectedItem()))){
+                    if(rs.getString("tarih").equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                         if(rs.getBoolean("yapildi_mi")){egzersizYapildi = 1;}
                         else {egzersizYapildi = 0;}
                     }
@@ -765,7 +765,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g.drawString("Ölçüm Değerleri:",340,290);
         int temp = 1;
         for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
-            if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+            if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                 if(this.kullanici.rol.equals("HASTA")){g.drawString(kullanici.olcumTarihleri.get(i).substring(11,21)+" -> " + kullanici.olcumler.get(i) + " mg/dL",340,290+temp*17);}
                 else{g.drawString(kullanici.olcumTarihleri.get(i).substring(11,21)+" -> " + kullanici.olcumler.get(i) + " mg/dL ("+kullanici.olcumUyarilar.get(i)+")",340,290+temp*17);}
                 temp++;
@@ -774,7 +774,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g.drawString("İnsülin Değerleri:",660,290);
         temp = 1;
         for (int i = 0; i < kullanici.insulinTarihleri.size(); i++) {
-            if(kullanici.insulinTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+            if(kullanici.insulinTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                 g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,290+temp*17);
                 temp++;
             }
@@ -964,16 +964,24 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
 
     }
 
+    public String tarihReformat(String tarih){
+        return tarih.substring(6,10)+"-"+tarih.substring(3,6)+tarih.substring(0,2);
+    }
+
+    public String tarihReformat2(String tarih){
+        return tarih.substring(8,10)+"-"+tarih.substring(5,8)+tarih.substring(0,4);
+    }
+
     public void tarihUpdate(Kullanici kullanici){
         for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
             boolean exists = false;
-            for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(tarihSec.getItemAt(j))){exists = true;}}
-            if(!exists){tarihSec.addItem(kullanici.olcumTarihleri.get(i).substring(0,10));}
+            for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(tarihReformat2(kullanici.olcumTarihleri.get(i)).equals(tarihSec.getItemAt(j))){exists = true;}}
+            if(!exists){tarihSec.addItem(tarihReformat2(kullanici.olcumTarihleri.get(i)));}
         }
-        String sql = "SELECT hasta_tc, insulin_tarihi FROM HASTA_INSULIN WHERE hasta_tc = ? ORDER BY insulin_tarihi";
-        String sql1 = "SELECT hasta_tc, tarih FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? ORDER BY tarih";
-        String sql2 = "SELECT hasta_tc, tarih FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ? ORDER BY tarih";
-        String sql3 = "SELECT * FROM HASTA_UYARI H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id=H.uyari_turu_id ORDER BY tarih";
+        String sql = "SELECT hasta_tc, FORMAT(insulin_tarihi, 'dd-MM-yyyy') AS insulin_tarihi FROM HASTA_INSULIN WHERE hasta_tc = ? ORDER BY insulin_tarihi";
+        String sql1 = "SELECT hasta_tc, FORMAT(tarih, 'dd-MM-yyyy') AS tarih FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? ORDER BY tarih";
+        String sql2 = "SELECT hasta_tc, FORMAT(tarih, 'dd-MM-yyyy') AS tarih FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ? ORDER BY tarih";
+        String sql3 = "SELECT H.hasta_tc, FORMAT(H.tarih, 'dd-MM-yyyy') AS tarih, H.uyari_turu_id, U.uyari_turu_id, U.tur_adi, U.tur_mesaji FROM HASTA_UYARI H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id=H.uyari_turu_id ORDER BY tarih";
         try(Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
             PreparedStatement ps = conn.prepareStatement(sql);
             PreparedStatement ps1 = conn.prepareStatement(sql1);
@@ -986,24 +994,25 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             ps3.setString(1, String.valueOf(kullanici.tc_no));
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                Date utilDate = rs.getTimestamp("insulin_tarihi");
-                LocalDate dateOnly = utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                //Date utilDate = rs.getTimestamp("insulin_tarihi");
+                //LocalDate dateOnly = utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                String utilDate = rs.getString("insulin_tarihi");
                 boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(String.valueOf(dateOnly).equals(tarihSec.getItemAt(j))){exists = true;}}
-                if(!exists){tarihSec.addItem(String.valueOf(dateOnly));}
+                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
+                if(!exists){tarihSec.addItem(String.valueOf(utilDate));}
             }
             rs = ps1.executeQuery();
             while(rs.next()){
                 String utilDate = rs.getString("tarih");
                 boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(tarihSec.getItemAt(j))){exists = true;}}
+                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
                 if(!exists){tarihSec.addItem(utilDate);}
             }
             rs = ps2.executeQuery();
             while(rs.next()){
                 String utilDate = rs.getString("tarih");
                 boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(tarihSec.getItemAt(j))){exists = true;}}
+                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
                 if(!exists){tarihSec.addItem(utilDate);}
             }
             if(this.kullanici.rol.equals("DOKTOR")){
@@ -1011,7 +1020,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 while(rs.next()){
                     String utilDate = rs.getString("tarih");
                     boolean exists = false;
-                    for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(tarihSec.getItemAt(j))){exists = true;}}
+                    for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
                     if(!exists){tarihSec.addItem(utilDate);}
                 }
             }
@@ -1498,7 +1507,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 conn.commit();
                 diyetYap.setVisible(false);
                 LocalDate dateOnly = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                if(String.valueOf(dateOnly).equals(String.valueOf(tarihSec.getSelectedItem()))){diyetYapildi = 1;}
+                if(String.valueOf(dateOnly).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){diyetYapildi = 1;}
                 diyetEgzersizCheck(kullanici);
                 tarihUpdate(kullanici);
             } catch (SQLException ex) {
@@ -1517,7 +1526,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 conn.commit();
                 egzersizYap.setVisible(false);
                 LocalDate dateOnly = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                if(String.valueOf(dateOnly).equals(String.valueOf(tarihSec.getSelectedItem()))){egzersizYapildi = 1;}
+                if(String.valueOf(dateOnly).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){egzersizYapildi = 1;}
                 diyetEgzersizCheck(kullanici);
                 tarihUpdate(kullanici);
             } catch (SQLException ex) {
