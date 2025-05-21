@@ -57,7 +57,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
-    String dogumSqlDate = null;
+    String dogumSqlDate = "";
     int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1;
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
@@ -877,7 +877,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Şifre:", WIDTH/2-115,270);
             g.drawString("EMail:", WIDTH/2-115,320);
             g.drawString("Dogum Tarihi:", WIDTH/2-115,370);
-            if(dogumSqlDate != null){g.drawString("Seçilen Tarih: " + dogumSqlDate,WIDTH/2-115,420);}
+            g.drawString("Seçilen Tarih: " + dogumSqlDate,WIDTH/2-115,420);
             g.drawString("Cinsiyet:", WIDTH/2-115,440);
             g.drawString("Profil Resmi:", WIDTH/2-115,495);
             if(selectedFile != null){g.drawString("Seçilen Dosya: " + selectedFile.getName(), WIDTH/2-115,545);}
@@ -1163,7 +1163,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             emailGiris.setVisible(false);
             emailGiris.setText("");
             dogumSecimButton.setVisible(false);
-            dogumSqlDate = null;
+            dogumSqlDate = "";
             cinsiyetGiris.setVisible(false);
             cinsiyetGiris.setSelectedIndex(0);
             profilSecimi.setVisible(false);
@@ -1213,7 +1213,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
             //Bu hata kontrol için sonra test ederim (etmedi)
-            if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && dogumSqlDate != null && selectedFile != null) {
+            if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && !dogumSqlDate.equals("") && selectedFile != null) {
                 String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                         "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
                 String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)" +
@@ -1236,7 +1236,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     ps.setString(3, soyadGiris.getText());
                     ps.setString(4, new String(sifreGiris.getPassword()));
                     ps.setString(5, emailGiris.getText());
-                    ps.setString(6, String.valueOf(dogumSqlDate));
+                    ps.setString(6, String.valueOf(tarihReformat(dogumSqlDate)));
                     if (cinsiyetGiris.getSelectedIndex() == 0) {
                         ps.setString(7, "E");
                     } else {
