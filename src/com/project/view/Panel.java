@@ -5,12 +5,16 @@ import com.project.main.Main;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Objects;
 
 public class Panel extends JPanel implements ActionListener {
     int WIDTH;
@@ -25,6 +29,7 @@ public class Panel extends JPanel implements ActionListener {
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean girisHata = false;
     private Dimension originalSize = new Dimension(1280, 720);
+    Image background;
 
     Panel(int WIDTH, int HEIGHT){
 
@@ -35,21 +40,27 @@ public class Panel extends JPanel implements ActionListener {
         this.setFocusable(true);
         this.setLayout(null);
 
-        hastaGiris.setBounds(WIDTH/2-115,300,250,25);
+        try {
+            background = ImageIO.read(new File("textures/saglik_bakanligi.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        hastaGiris.setBounds(WIDTH/2-125,310,250,25);
         hastaGiris.setFont(new Font("Calibri",Font.BOLD,15));
         hastaGiris.setHorizontalAlignment(SwingConstants.CENTER);
         hastaGiris.setFocusable(false);
         hastaGiris.addActionListener(this);
         this.add(hastaGiris);
 
-        doktorGiris.setBounds(WIDTH/2-115,350,250,25);
+        doktorGiris.setBounds(WIDTH/2-125,380,250,25);
         doktorGiris.setFont(new Font("Calibri",Font.BOLD,15));
         doktorGiris.setHorizontalAlignment(SwingConstants.CENTER);
         doktorGiris.setFocusable(false);
         doktorGiris.addActionListener(this);
         this.add(doktorGiris);
 
-        girisYap.setBounds(WIDTH/2+35,400,100,25);
+        girisYap.setBounds(WIDTH/2+25,430,100,25);
         girisYap.setFont(new Font("Calibri",Font.BOLD,15));
         girisYap.setHorizontalAlignment(SwingConstants.CENTER);
         girisYap.setFocusable(false);
@@ -57,7 +68,7 @@ public class Panel extends JPanel implements ActionListener {
         girisYap.addActionListener(this);
         this.add(girisYap);
 
-        geriButton.setBounds(WIDTH/2-115,400,100,25);
+        geriButton.setBounds(WIDTH/2-125,430,100,25);
         geriButton.setFont(new Font("Calibri",Font.BOLD,15));
         geriButton.setHorizontalAlignment(SwingConstants.CENTER);
         geriButton.setFocusable(false);
@@ -66,7 +77,7 @@ public class Panel extends JPanel implements ActionListener {
         this.add(geriButton);
 
         kullaniciAdiGiris.setPreferredSize(new Dimension(10,300));
-        kullaniciAdiGiris.setBounds(WIDTH/2-115,300,250,20);
+        kullaniciAdiGiris.setBounds(WIDTH/2-125,310,250,25);
         kullaniciAdiGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         kullaniciAdiGiris.setVisible(false);
         kullaniciAdiGiris.setDocument(new PlainDocument(){
@@ -100,7 +111,7 @@ public class Panel extends JPanel implements ActionListener {
         this.add(kullaniciAdiGiris);
 
         sifreGiris.setPreferredSize(new Dimension(10,300));
-        sifreGiris.setBounds(WIDTH/2-115,350,250,20);
+        sifreGiris.setBounds(WIDTH/2-125,380,250,25);
         sifreGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         sifreGiris.setVisible(false);
         sifreGiris.setDocument(new PlainDocument(){
@@ -130,22 +141,33 @@ public class Panel extends JPanel implements ActionListener {
     }
 
     public void draw(Graphics g){
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.drawImage(background,0,0,WIDTH,HEIGHT,null);
+        g2d.setColor(new Color(0,0,0,150));
+        g2d.fillRoundRect(WIDTH/2-170,200,340,300, 40, 40);
+
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Consolas",Font.PLAIN,30));
-        g.drawString("Diyabet Sistemi Giriş",WIDTH/2-170,100);
+        g.setFont(new Font("Consolas",Font.PLAIN,40));
+        g.drawString("Diyabet Sistemi Giriş",WIDTH/2-230,100);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
         if(secti == 1){
-            g.drawString("HASTA GİRİŞİ",WIDTH/2-40,260);
-            g.drawString("Kullanıcı Adı:", WIDTH/2-115,290);
-            g.drawString("Şifre:", WIDTH/2-115,340);
+            g.drawString("HASTA GİRİŞİ",WIDTH/2-50,250);
+            g.drawString("Kullanıcı Adı:", WIDTH/2-125,300);
+            g.drawString("Şifre:", WIDTH/2-125,370);
         } else if (secti == 2) {
-            g.drawString("DOKTOR GİRİŞİ",WIDTH/2-40,260);
-            g.drawString("Kullanıcı Adı:", WIDTH/2-115,290);
-            g.drawString("Şifre:", WIDTH/2-115,340);
+            g.drawString("DOKTOR GİRİŞİ",WIDTH/2-50,250);
+            g.drawString("Kullanıcı Adı:", WIDTH/2-125,300);
+            g.drawString("Şifre:", WIDTH/2-125,370);
+        } else{
+            g.setFont(new Font("Consolas",Font.PLAIN,20));
+            g.drawString("Hoşgeldiniz",WIDTH/2-60,250);
+            g.setFont(new Font("Consolas",Font.PLAIN,15));
+            g.drawString("Lütfen uygun seçeneği seçiniz.",WIDTH/2-120,460);
         }
         g.setColor(Color.RED);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
-        if(girisHata){g.drawString("Hatalı TC veya Şifre girişi!",WIDTH/2-100,450);}
+        if(girisHata){g.drawString("Hatalı TC veya Şifre girişi!",WIDTH/2-110,480);}
     }
 
     @Override
