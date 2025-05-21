@@ -710,7 +710,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         String sql1 = "SELECT * FROM HASTA_EGZERSIZ_CHECK WHERE hasta_tc = ?";
         try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); //HASTA
              PreparedStatement ps = conn.prepareStatement(sql);
-             PreparedStatement ps1 = conn.prepareStatement(sql);) {
+             PreparedStatement ps1 = conn.prepareStatement(sql1);) {
 
             ps.setString(1,String.valueOf(kullanici.tc_no));
             ResultSet rs = ps.executeQuery();
