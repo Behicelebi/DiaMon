@@ -562,6 +562,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             throw new RuntimeException(e);
         }
         if(kullanici.rol.equals("DOKTOR")){
+            graphGoster.setVisible(false);
             hastaEkle.setVisible(true);
             tarihSec.setVisible(false);
             olcumGiris.setVisible(false);
