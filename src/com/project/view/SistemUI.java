@@ -57,7 +57,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     JPasswordField sifreGiris = new JPasswordField();
     JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
-    Date dogumSqlDate = null;
+    String dogumSqlDate = null;
     int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1;
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
@@ -1202,7 +1202,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             okButton.addActionListener(ev -> {
                 dateChooser.setDate(calendar.getDate());
                 java.util.Date utilDate = dateChooser.getDate();
-                dogumSqlDate = new java.sql.Date(utilDate.getTime());
+                dogumSqlDate = tarihReformat2(String.valueOf(new java.sql.Date(utilDate.getTime())));
                 dialog.dispose();
                 repaint();
             });
