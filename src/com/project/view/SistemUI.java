@@ -6,6 +6,11 @@ import com.project.main.Main;
 import com.project.util.EmailSender;
 import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -46,7 +51,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Rectangle kullaniciRect = new Rectangle(14,130,620,130);
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
-    JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap");
+    JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap"), graphGoster = new JButton("Kan şekeri grafiği");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), tarihSec = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
@@ -82,6 +87,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         currentScreen = Screen.HASTA_PROFIL;
                         cikisButton.setText("Geri");
                         hastaEkle.setVisible(false);
+                        graphGoster.setVisible(true);
                         secilenHasta = i;
                         if(!relations.get(secilenHasta).oneriGirdiMi){
                             oneriYap.setVisible(true);
@@ -250,6 +256,27 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         oneriYap.setFocusable(false);
         oneriYap.addActionListener(this);
         this.add(oneriYap);
+
+        graphGoster.setBounds(20,500,150,20);
+        graphGoster.setFont(new Font("Calibri",Font.BOLD,15));
+        graphGoster.setHorizontalAlignment(SwingConstants.CENTER);
+        graphGoster.setVisible(false);
+        graphGoster.setFocusable(false);
+        graphGoster.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame graphFrame = new JFrame("Kan Şekeri Grafiği");
+                graphFrame.setSize(600, 400);
+                graphFrame.setLocationRelativeTo(null);
+                graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+                ChartPanel chartPanel = createChartPanel();
+                graphFrame.setContentPane(chartPanel);
+
+                graphFrame.setVisible(true);
+            }
+        });
+        this.add(graphGoster);
 
         adGiris.setPreferredSize(new Dimension(10,300));
         adGiris.setBounds(WIDTH/2-115,180,250,20);
@@ -447,6 +474,39 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             ex.printStackTrace();
         }
     }
+
+    private ChartPanel createChartPanel() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+        XYSeries series = new XYSeries("Kan Şekeri");
+        if(kullanici.rol.equals("HASTA")){
+            for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
+                if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+                    LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
+                    series.add(dateTime.getHour(), kullanici.olcumler.get(i));
+                }
+            }
+        }else if (kullanici.rol.equals("DOKTOR")){
+            for (int i = 0; i < relations.get(secilenHasta).olcumTarihleri.size(); i++) {
+                if(relations.get(secilenHasta).olcumTarihleri.get(i).substring(0,10).equals(String.valueOf(tarihSec.getSelectedItem()))){
+                    LocalDateTime dateTime = LocalDateTime.parse(relations.get(secilenHasta).olcumTarihleri.get(i), formatter);
+                    series.add(dateTime.getHour(), relations.get(secilenHasta).olcumler.get(i));
+                }
+            }
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(series);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                "Kan Şekeri Grafiği",
+                "SAAT",
+                "ÖLÇÜMLER",
+                dataset
+        );
+
+        return new ChartPanel(chart);
+    }
+
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +
                 "WHERE tc_no = ? AND sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?))";
@@ -515,6 +575,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             tarihSec.removeAllItems();
             tarihSec.setVisible(true);
             tarihUpdate(kullanici);
+            graphGoster.setVisible(true);
             diyetYapildi = -1;
             egzersizYapildi = -1;
             hastaEkle.setVisible(false);
@@ -1245,10 +1306,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
             else if (currentScreen == Screen.HASTA_PROFIL) {
                 oneriYap.setVisible(false);
-                hastaEkle.setVisible(true);
+                graphGoster.setVisible(false);
                 diyetGecmis.setVisible(false);
                 egzersizGecmis.setVisible(false);
                 tarihSec.setVisible(false);
+                hastaEkle.setVisible(true);
                 diyetGecmis.setSelectedIndex(0);
                 egzersizGecmis.setSelectedIndex(0);
                 cikisButton.setText("Çıkış Yap");
