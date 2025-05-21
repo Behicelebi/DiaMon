@@ -1430,10 +1430,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         ps.setString(4,olcumGiris.getText());
                         ps.executeUpdate();
                         conn.commit();
+                        int temp_tarih = tarihSec.getSelectedIndex();
                         initialize();
                         olcumGirildiMi = 1;
                         LocalDateTime ldt = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                         insulinCheck(ldt, ldt, kullanici);
+                        tarihSec.setSelectedIndex(temp_tarih);
                         repaint();
                     } catch (SQLException ex) {
                         throw new RuntimeException(ex);
