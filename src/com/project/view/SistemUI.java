@@ -722,7 +722,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             else {kullanici.diyetYuzdesi=0;}
 
             ps1.setString(1,String.valueOf(kullanici.tc_no));
-            rs = ps.executeQuery();
+            rs = ps1.executeQuery();
             yes=0;
             no=0;
             while(rs.next()){
