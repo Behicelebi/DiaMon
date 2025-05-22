@@ -142,10 +142,13 @@ public class Panel extends JPanel implements ActionListener {
 
     public void draw(Graphics g){
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(2f));
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawImage(background,0,0,WIDTH,HEIGHT,null);
         g2d.setColor(new Color(0,0,0,150));
         g2d.fillRoundRect(WIDTH/2-170,200,340,300, 40, 40);
+        g2d.setColor(new Color(96, 96, 96,150));
+        g2d.drawRoundRect(WIDTH/2-170,200,340,300, 40, 40);
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,40));

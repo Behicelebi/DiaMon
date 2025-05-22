@@ -48,7 +48,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     public boolean doktorMu = false; //false=HASTA, true=DOKTOR
     private static final Logger logger = Logger.getLogger(SistemUI.class.getName());
     Kullanici kullanici;
-    Rectangle kullaniciRect = new Rectangle(14,130,620,130);
+    Rectangle kullaniciRect = new Rectangle(10,130,620,130);
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
     JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap"), graphGoster = new JButton("Kan şekeri grafiği");
@@ -550,7 +550,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             int i = 0;
             while(rs1.next()){
                 relations.add(new Kullanici(rs1.getLong("tc_no"), rs1.getString("ad"),rs1.getString("soyad"),rs1.getString("email"),rs1.getString("dogum_tarihi"),rs1.getString("cinsiyet"), ImageIO.read(rs1.getBinaryStream("profil_resmi")), rs1.getString("rol")));
-                relationsRects.add(new Rectangle(646,270 + 140*(i-1),620,130));
+                relationsRects.add(new Rectangle(650,270 + 140*(i-1),620,130));
                 if(relations.get(i).rol.equals("HASTA")){
                     hastaBilgiEkle(relations.get(i));
                 }
@@ -748,8 +748,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g2d.drawLine(320, 266, 320, HEIGHT);
         g2d.drawLine(960, 266, 960, HEIGHT);
         g2d.drawLine(2,266,WIDTH,266);
-        g.setColor(Color.BLUE);
-        g.fillRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height);
+        g2d.setStroke(new BasicStroke(2f));
+        g2d.setColor(Color.BLUE);
+        g2d.fillRoundRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height, 40, 40);
+        g2d.setColor(new Color(0, 160, 224, 255));
+        g2d.drawRoundRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height, 40, 40);
         g.drawImage(kullanici.profil_resmi,20,150,this);
         g.setColor(Color.WHITE);
         g.drawString("Ad Soyad: " + kullanici.ad + " " + kullanici.soyad, 150,150);
@@ -829,7 +832,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             for (int i = 0; i < relations.size(); i++) {
                 if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.BLUE);}
                 else if (kullanici.rol.equals("HASTA")){g.setColor(new Color(3, 92, 0));}
-                g.fillRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height);
+                g2d.setStroke(new BasicStroke(2f));
+                g2d.fillRoundRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height, 40, 40);
+                g2d.setColor(new Color(0, 160, 224, 255));
+                g2d.drawRoundRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height, 40, 40);
                 g.setColor(Color.WHITE);
                 g.drawImage(relations.get(i).profil_resmi,660, relationsRects.get(i).y + 20,this);
                 g.drawString("Ad Soyad: " + relations.get(i).ad + " " + relations.get(i).soyad, 786, relationsRects.get(i).y + 20);
@@ -850,11 +856,13 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             if(kullanici.rol.equals("HASTA")){
                 drawProfil(g,g2d,kullanici);
             }
-            g2d.setStroke(new BasicStroke());
+            g2d.setStroke(new BasicStroke(2f));
 
-            if (kullanici.rol.equals("DOKTOR")) {g.setColor(new Color(3, 92, 0));}
-            else if (kullanici.rol.equals("HASTA")){g.setColor(Color.BLUE);}
-            g.fillRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height);
+            if (kullanici.rol.equals("DOKTOR")) {g2d.setColor(new Color(3, 92, 0));}
+            else if (kullanici.rol.equals("HASTA")){g2d.setColor(Color.BLUE);}
+            g2d.fillRoundRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height, 40, 40);
+            g2d.setColor(new Color(54, 210, 1, 255));
+            g2d.drawRoundRect(kullaniciRect.x,kullaniciRect.y, kullaniciRect.width, kullaniciRect.height, 40, 40);
             g.drawImage(kullanici.profil_resmi,28,150,this);
             g.setColor(Color.WHITE);
             g.drawString("Ad Soyad: " + kullanici.ad + " " + kullanici.soyad, 150,150);
