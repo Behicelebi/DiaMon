@@ -51,11 +51,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Rectangle kullaniciRect = new Rectangle(10,130,620,130);
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
-    JButton hastaEkle = new JButton("Hasta Ekle"), girisYap = new JButton("Hasta Ekle"), geriButton = new JButton("Geri"), profilSecimi = new JButton("Seç"), cikisButton = new JButton("Çıkış Yap"), selectDate = new JButton("Tarih Seç"), olcumGir = new JButton("Kayıt Et"), oneriYap = new JButton("Öneri Yap"), diyetYap = new JButton("Diyet Yap"), egzersizYap = new JButton("Egzersiz Yap"), graphGoster = new JButton("Kan şekeri grafiği");
+    RoundedButton hastaEkle = new RoundedButton("Hasta Ekle"), girisYap = new RoundedButton("Hasta Ekle"), geriButton = new RoundedButton("Geri"), profilSecimi = new RoundedButton("Seç"), cikisButton = new RoundedButton("Çıkış Yap"), selectDate = new RoundedButton("Tarih Seç"), olcumGir = new RoundedButton("Kayıt Et"), oneriYap = new RoundedButton("Öneri Yap"), diyetYap = new RoundedButton("Diyet Yap"), egzersizYap = new RoundedButton("Egzersiz Yap"), graphGoster = new RoundedButton("Kan şekeri grafiği");
     JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), belirtiFiltreleme = new JComboBox<String>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), tarihSec = new JComboBox<String>(), olcumFiltreleme = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
-    JButton dogumSecimButton = new JButton("Doğum Tarihi Seç");
+    RoundedButton dogumSecimButton = new RoundedButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
     String dogumSqlDate = "";
     int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1;
@@ -1315,7 +1315,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             JCalendar calendar = new JCalendar();
             dialog.add(calendar, BorderLayout.CENTER);
 
-            JButton okButton = new JButton("OK");
+            RoundedButton okButton = new RoundedButton("OK");
             okButton.addActionListener(ev -> {
                 dateChooser.setDate(calendar.getDate());
                 java.util.Date utilDate = dateChooser.getDate();
@@ -1496,7 +1496,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             timePanel.add(new JLabel("Saat:"));
             timePanel.add(hourSpinner);
 
-            JButton okButton = new JButton("OK");
+            RoundedButton okButton = new RoundedButton("OK");
             okButton.addActionListener(ev -> {
                 Date dateOnly = calendar.getDate();
 

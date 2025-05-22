@@ -14,17 +14,16 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.Objects;
 
 public class Panel extends JPanel implements ActionListener {
     int WIDTH;
     int HEIGHT;
     JTextField kullaniciAdiGiris = new JTextField();
     JPasswordField sifreGiris = new JPasswordField();
-    JButton hastaGiris = new JButton("Hasta Giriş");
-    JButton doktorGiris = new JButton("Doktor Giriş");
-    JButton girisYap = new JButton("Giriş Yap");
-    JButton geriButton = new JButton("Geri");
+    RoundedButton hastaGiris = new RoundedButton("Hasta Giriş");
+    RoundedButton doktorGiris = new RoundedButton("Doktor Giriş");
+    RoundedButton girisYap = new RoundedButton("Giriş Yap");
+    RoundedButton geriButton = new RoundedButton("Geri");
     int secti = 0;
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean girisHata = false;
