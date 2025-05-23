@@ -1,5 +1,7 @@
 package com.project.view;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.project.main.Main;
 
 import java.awt.event.KeyAdapter;
@@ -151,14 +153,17 @@ public class Panel extends JPanel implements ActionListener {
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Consolas",Font.PLAIN,40));
-        g.drawString("Diyabet Sistemi Giriş",WIDTH/2-230,100);
-        g.setFont(new Font("Consolas",Font.PLAIN,15));
+        g.drawString("Sağlık Bakanlığı Diyabet Sistemi",WIDTH/2-355,100);
         if(secti == 1){
-            g.drawString("HASTA GİRİŞİ",WIDTH/2-50,250);
+            g.setFont(new Font("Consolas",Font.PLAIN,20));
+            g.drawString("Hasta Girişi",WIDTH/2-64,250);
+            g.setFont(new Font("Consolas",Font.PLAIN,15));
             g.drawString("Kullanıcı Adı:", WIDTH/2-125,300);
             g.drawString("Şifre:", WIDTH/2-125,370);
         } else if (secti == 2) {
-            g.drawString("DOKTOR GİRİŞİ",WIDTH/2-50,250);
+            g.setFont(new Font("Consolas",Font.PLAIN,20));
+            g.drawString("Doktor Girişi",WIDTH/2-70,250);
+            g.setFont(new Font("Consolas",Font.PLAIN,15));
             g.drawString("Kullanıcı Adı:", WIDTH/2-125,300);
             g.drawString("Şifre:", WIDTH/2-125,370);
         } else{

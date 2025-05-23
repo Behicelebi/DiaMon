@@ -17,7 +17,7 @@ public class FillDatabaseTables {
             addDiyetTypes(conn);
             addEgzersizTypes(conn);
             addUyariTypes(conn);
-            System.out.println("✅ Varsayılan veriler başarıyla yüklendi.");
+            System.out.println("DEBUG: Varsayılan veriler başarıyla yüklendi.");
         } catch (Exception e) {
             e.printStackTrace();
         }

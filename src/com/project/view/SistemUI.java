@@ -1,6 +1,8 @@
 package com.project.view;
 
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
 import com.project.util.EmailSender;
@@ -15,6 +17,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -171,7 +174,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(hastaEkle);
 
         TC_Giris.setPreferredSize(new Dimension(10,300));
-        TC_Giris.setBounds(WIDTH/2-115,130,250,20);
+        TC_Giris.setBounds(WIDTH/2-115,128,250,25);
         TC_Giris.setFont(new Font("Calibri",Font.PLAIN,15));
         TC_Giris.setVisible(false);
         TC_Giris.setDocument(new PlainDocument() {
@@ -187,7 +190,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(TC_Giris);
 
         olcumGiris.setPreferredSize(new Dimension(10,300));
-        olcumGiris.setBounds(WIDTH/2-515,105,250,20);
+        olcumGiris.setBounds(WIDTH/2-515,103,250,25);
         olcumGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         olcumGiris.setVisible(false);
         olcumGiris.setDocument(new PlainDocument() {
@@ -203,7 +206,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(olcumGiris);
 
         belirti_1_giris.setPreferredSize(new Dimension(10,300));
-        belirti_1_giris.setBounds(WIDTH/2-515,180,250,25);
+        belirti_1_giris.setBounds(WIDTH/2-515,178,250,25);
         belirti_1_giris.setFont(new Font("Calibri",Font.PLAIN,15));
         belirti_1_giris.setVisible(false);
         belirti_1_giris.setFocusable(false);
@@ -214,7 +217,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(belirti_1_giris);
 
         belirti_2_giris.setPreferredSize(new Dimension(10,300));
-        belirti_2_giris.setBounds(WIDTH/2-515,235,250,25);
+        belirti_2_giris.setBounds(WIDTH/2-515,233,250,25);
         belirti_2_giris.setFont(new Font("Calibri",Font.PLAIN,15));
         belirti_2_giris.setVisible(false);
         belirti_2_giris.setFocusable(false);
@@ -225,7 +228,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(belirti_2_giris);
 
         belirti_3_giris.setPreferredSize(new Dimension(10,300));
-        belirti_3_giris.setBounds(WIDTH/2-515,285,250,25);
+        belirti_3_giris.setBounds(WIDTH/2-515,283,250,25);
         belirti_3_giris.setFont(new Font("Calibri",Font.PLAIN,15));
         belirti_3_giris.setVisible(false);
         belirti_3_giris.setFocusable(false);
@@ -357,7 +360,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(graphGoster);
 
         adGiris.setPreferredSize(new Dimension(10,300));
-        adGiris.setBounds(WIDTH/2-115,180,250,20);
+        adGiris.setBounds(WIDTH/2-115,178,250,25);
         adGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         adGiris.setVisible(false);
         adGiris.setDocument(new PlainDocument(){
@@ -371,7 +374,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(adGiris);
 
         soyadGiris.setPreferredSize(new Dimension(10,300));
-        soyadGiris.setBounds(WIDTH/2-115,230,250,20);
+        soyadGiris.setBounds(WIDTH/2-115,228,250,25);
         soyadGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         soyadGiris.setVisible(false);
         soyadGiris.setDocument(new PlainDocument(){
@@ -385,7 +388,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(soyadGiris);
 
         sifreGiris.setPreferredSize(new Dimension(10,300));
-        sifreGiris.setBounds(WIDTH/2-115,280,250,20);
+        sifreGiris.setBounds(WIDTH/2-115,278,250,25);
         sifreGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         sifreGiris.setVisible(false);
         sifreGiris.setDocument(new PlainDocument(){
@@ -399,7 +402,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(sifreGiris);
 
         emailGiris.setPreferredSize(new Dimension(10,300));
-        emailGiris.setBounds(WIDTH/2-115,330,250,20);
+        emailGiris.setBounds(WIDTH/2-115,328,250,25);
         emailGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         emailGiris.setVisible(false);
         emailGiris.setDocument(new PlainDocument(){
@@ -413,7 +416,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(emailGiris);
 
         dogumSecimButton.setPreferredSize(new Dimension(10,300));
-        dogumSecimButton.setBounds(WIDTH/2-115,380,250,20);
+        dogumSecimButton.setBounds(WIDTH/2-115,378,250,25);
         dogumSecimButton.setFont(new Font("Calibri",Font.PLAIN,15));
         dogumSecimButton.setVisible(false);
         dogumSecimButton.setFocusable(false);
@@ -421,7 +424,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(dogumSecimButton);
 
         cinsiyetGiris.setPreferredSize(new Dimension(10,300));
-        cinsiyetGiris.setBounds(WIDTH/2-115,450,250,25);
+        cinsiyetGiris.setBounds(WIDTH/2-115,448,250,25);
         cinsiyetGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         cinsiyetGiris.setVisible(false);
         cinsiyetGiris.setFocusable(false);
@@ -430,7 +433,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.add(cinsiyetGiris);
 
         profilSecimi.setPreferredSize(new Dimension(10,300));
-        profilSecimi.setBounds(WIDTH/2-115,505,250,20);
+        profilSecimi.setBounds(WIDTH/2-115,503,250,25);
         profilSecimi.setFont(new Font("Calibri",Font.PLAIN,15));
         profilSecimi.setVisible(false);
         profilSecimi.setFocusable(false);
@@ -650,7 +653,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             belirtiFiltreleme.setVisible(true);
             olcumFiltreleme.setSelectedIndex(0);
             olcumFiltreleme.setVisible(true);
-            olcumGiris.setBounds(WIDTH/2-515,130,250,20);
+            olcumGiris.setBounds(WIDTH/2-515,128,250,25);
             olcumGir.setVisible(false);
             diyetYap.setVisible(false);
             egzersizYap.setVisible(false);
@@ -667,7 +670,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             hastaEkle.setVisible(false);
             olcumGiris.setVisible(true);
             olcumGiris.setText("");
-            olcumGiris.setBounds(980,310,100,20);
+            olcumGiris.setBounds(980,308,100,25);
             olcumGir.setVisible(true);
             if(kullanici.oneriGirdiMi && !kullanici.diyetOneri.equals("Yok")){
                 String sql2 = "SELECT * FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? AND tarih = ?";
@@ -958,7 +961,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
 
             g.setColor(Color.BLACK);
-            g.fillRect(0,0,WIDTH,130);
+            //g.fillRect(0,0,WIDTH,130);
             float[] dashPattern = {6, 4};
             g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
             g2d.setColor(Color.WHITE);
@@ -996,7 +999,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Belirti 1:", WIDTH/2-515,170);
             g.drawString("Belirti 2:", WIDTH/2-515,225);
             g.drawString("Belirti 3:", WIDTH/2-515,280);
-            g.drawString("mg/dL", WIDTH/2-260,140);
+            g.drawString("mg/dL", WIDTH/2-260,145);
             g.drawString("Ad:", WIDTH/2-115,170);
             g.drawString("Soyad:", WIDTH/2-115,220);
             g.drawString("Şifre:", WIDTH/2-115,270);

@@ -171,7 +171,7 @@ public class CreateDatabase {
                             "END";
             stmt.executeUpdate(createHastaInsulinTable);
 
-            System.out.println("✅ Veritabanı ve tablolar başarıyla kuruldu.");
+            System.out.println("DEBUG: Veritabanı ve tablolar başarıyla kuruldu.");
 
         } catch (Exception e) {
             e.printStackTrace();

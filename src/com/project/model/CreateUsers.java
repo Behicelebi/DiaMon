@@ -2,6 +2,7 @@ package com.project.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLOutput;
 import java.sql.Statement;
 
 public class CreateUsers {
@@ -99,6 +100,8 @@ public class CreateUsers {
             stmt.executeUpdate("GRANT SELECT ON DIYET_TURU TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON EGZERSIZ_TURU TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON UYARI_TURU TO hasta_role");
+
+            System.out.println("DEBUG: Kullanıcılar başarıyla oluşturuldu.");
 
         } catch (Exception e) {
             e.printStackTrace();

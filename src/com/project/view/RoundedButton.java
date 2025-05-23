@@ -12,7 +12,7 @@ public class RoundedButton extends JButton {
         setFocusPainted(false);
         setContentAreaFilled(false);
         setBorderPainted(false);
-        setForeground(Color.BLACK);
+        setForeground(Color.WHITE);
         setFont(new Font("Arial", Font.BOLD, 14));
         setPreferredSize(new Dimension(160, 50));
         setHorizontalAlignment(SwingConstants.CENTER);
@@ -33,7 +33,7 @@ public class RoundedButton extends JButton {
             g2.setColor(new Color(0, 0, 0, 30));
             g2.fillRoundRect(2, 4, getWidth() - 4, getHeight() - 4, radius, radius);
         }
-        g2.setColor(isPressed ? new Color(138, 136, 136) : Color.WHITE);
+        g2.setColor(isPressed ? new Color(138, 136, 136) : new Color(0, 0, 0, 60));
         g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
         g2.setColor(new Color(180, 180, 180));
         g2.setStroke(new BasicStroke(2));
