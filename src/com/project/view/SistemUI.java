@@ -63,6 +63,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Date[] selectedDateTime = {new Date()};
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
     String gunlukUyari = "";
+    Image background;
 
     SistemUI(int WIDTH, int HEIGHT){
         this.WIDTH = WIDTH;
@@ -72,6 +73,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.setFocusable(true);
         this.setLayout(null);
         this.addMouseWheelListener(this);
+
+        try {
+            background = ImageIO.read(new File("textures/saglik_bakanligi.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MINUTE, 0);
@@ -921,7 +928,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         }
     }
     public void draw(Graphics g){
-
+        g.drawImage(background,0,0,WIDTH,HEIGHT,null);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setFont(new Font("Consolas",Font.PLAIN,15));
