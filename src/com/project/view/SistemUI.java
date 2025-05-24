@@ -65,7 +65,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
-    String gunlukUyari = "";
+    String gunlukUyari = "",gunlukUyariAciklama="";
     Image background;
 
     SistemUI(int WIDTH, int HEIGHT){
@@ -507,7 +507,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                             ps2.setDate(2, java.sql.Date.valueOf(tarihReformat(String.valueOf(tarihSec.getSelectedItem()))));
                             ResultSet rs2 = ps2.executeQuery();
                             gunlukUyari = "";
-                            if(rs2.next()){gunlukUyari = rs2.getString("tur_adi");}
+                            gunlukUyariAciklama = "";
+                            if(rs2.next()){
+                                gunlukUyari = rs2.getString("tur_adi");
+                                gunlukUyariAciklama = rs2.getString("tur_mesaji");
+                            }
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                         }
@@ -844,7 +848,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
         g2d.setColor(Color.WHITE);
         g2d.drawLine(320, 266, 320, HEIGHT);
-        g2d.drawLine(960, 266, 960, HEIGHT);
+        //g2d.drawLine(960, 266, 960, HEIGHT);
         g2d.drawLine(2,266,WIDTH,266);
         g2d.setStroke(new BasicStroke(2f));
         g2d.setColor(Color.BLUE);
@@ -886,10 +890,11 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g.drawString("Gece: "+ortalamaHesapla(new int[]{gece, aksam, ikindi, ogle, sabah})+" mg/dL",660,375);
 
         g.drawString("İnsülin Değerleri:",660,400);
-        temp = 1;
+        temp = 0;
         for (int i = 0; i < kullanici.insulinTarihleri.size(); i++) {
             if(kullanici.insulinTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
-                g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,400+temp*17);
+                g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,417+temp*34);
+                g.drawString(kullanici.insulinUyariAciklamalar.get(i),660,434+temp*34);
                 temp++;
             }
         }
@@ -923,12 +928,15 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         }
 
         g.setColor(Color.WHITE);
+        g.setFont(new Font("Consolas",Font.PLAIN,13));
         if(this.kullanici.rol.equals("HASTA")){
             g.drawString("Ölçüm Giriş: ", 980,290);
             g.drawString("mg/dL", 1090,325);
         } else{
-            g.drawString("Günlük Uyarı: "+gunlukUyari,980,290);
+            g.drawString("Günlük Uyarı: "+gunlukUyari,660,630);
+            g.drawString(gunlukUyariAciklama,660,650);
         }
+        g.setFont(new Font("Consolas",Font.PLAIN,15));
     }
     public void draw(Graphics g){
         g.drawImage(background,0,0,WIDTH,HEIGHT,null);
@@ -940,10 +948,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         if(currentScreen == Screen.MAIN){
 
             for (int i = 0; i < relations.size(); i++) {
-                if (kullanici.rol.equals("DOKTOR")) {
-                    //if(belirtiFiltreleme.getSelectedIndex()!=0 && !relations.get(i).belirtiler.contains(belirtiFiltreleme.getSelectedItem())){continue;}
-                    g.setColor(Color.BLUE);
-                }
+                if (kullanici.rol.equals("DOKTOR")) {g.setColor(Color.BLUE);}
                 else if (kullanici.rol.equals("HASTA")){g.setColor(new Color(3, 92, 0));}
                 g2d.setStroke(new BasicStroke(2f));
                 g2d.fillRoundRect(relationsRects.get(i).x, relationsRects.get(i).y, relationsRects.get(i).width, relationsRects.get(i).height, 40, 40);
@@ -1340,7 +1345,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
             //Bu hata kontrol için sonra test ederim (etmedi)
-            if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && !dogumSqlDate.equals("") && selectedFile != null) {
+            if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && !dogumSqlDate.equals("") && selectedFile != null && !olcumGiris.getText().equals("")) {
                 String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                         "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
                 String sql1 = "INSERT INTO HASTA_DOKTOR (doktor_tc, hasta_tc)" +
