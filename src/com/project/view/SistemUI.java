@@ -889,12 +889,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g.drawString("Akşam: "+ortalamaHesapla(new int[]{aksam, ikindi, ogle, sabah})+" mg/dL",660,358);
         g.drawString("Gece: "+ortalamaHesapla(new int[]{gece, aksam, ikindi, ogle, sabah})+" mg/dL",660,375);
 
-        g.drawString("İnsülin Değerleri:",660,400);
+        g.drawString("İnsülin Değerleri:",660,438);
         temp = 0;
         for (int i = 0; i < kullanici.insulinTarihleri.size(); i++) {
             if(kullanici.insulinTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
-                g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,417+temp*34);
-                g.drawString(kullanici.insulinUyariAciklamalar.get(i),660,434+temp*34);
+                g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,455+temp*34);
+                g.drawString(kullanici.insulinUyariAciklamalar.get(i),660,472+temp*34);
                 temp++;
             }
         }
@@ -933,8 +933,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Ölçüm Giriş: ", 980,290);
             g.drawString("mg/dL", 1090,325);
         } else{
-            g.drawString("Günlük Uyarı: "+gunlukUyari,660,630);
-            g.drawString(gunlukUyariAciklama,660,650);
+            g.drawString("Günlük Uyarı: "+gunlukUyari,660,675);
+            g.drawString(gunlukUyariAciklama,660,695);
         }
         g.setFont(new Font("Consolas",Font.PLAIN,15));
     }
@@ -965,15 +965,20 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 g.drawString("Rol: " + relations.get(i).rol, 786, relationsRects.get(i).y + 120);
             }
 
-            g.setColor(Color.BLACK);
-            //g.fillRect(0,0,WIDTH,130);
+            g2d.setColor(new Color(0, 0, 0, 150));
+            g2d.fillRoundRect(0,-38,WIDTH,160, 40, 40);
+
             float[] dashPattern = {6, 4};
             g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
             g2d.setColor(Color.WHITE);
-            g2d.drawLine(2,124,WIDTH,124);
+            g2d.drawRoundRect(4,-38,WIDTH - 10,158, 40, 40);
+            //g2d.drawLine(2,124,WIDTH,124);
             g2d.drawLine(640, 128, 640, HEIGHT);
             if(kullanici.rol.equals("HASTA")){
                 drawProfil(g,g2d,kullanici);
+                g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+                g2d.drawLine(WIDTH/2, 400, WIDTH, 400);
+                g2d.drawLine(WIDTH/2, 640, WIDTH, 640);
             }
             g2d.setStroke(new BasicStroke(2f));
 
@@ -1025,8 +1030,13 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g2d.setColor(Color.WHITE);
             float[] dashPattern = {6, 4};
             g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
-            g2d.drawLine(2,124,WIDTH,124);
+            g2d.setColor(new Color(0, 0, 0, 150));
+            g2d.fillRoundRect(0,-38,WIDTH,160, 40, 40);
+            g2d.setColor(Color.WHITE);
+            g2d.drawRoundRect(4,-38,WIDTH - 10,158, 40, 40);
             g2d.drawLine(640, 128, 640, HEIGHT);
+            g2d.drawLine(WIDTH/2, 400, WIDTH, 400);
+            g2d.drawLine(WIDTH/2, 640, WIDTH, 640);
             drawProfil(g,g2d,relations.get(secilenHasta));
             g2d.setStroke(new BasicStroke());
         }
@@ -1686,7 +1696,9 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             boolean canScrollDown = firstRect.y <= upperLimit && notches > 0 && lastRect.y + 130 >= lowerLimit;
             boolean canScrollUp = firstRect.y < upperLimit && notches < 0 && lastRect.y + 150 >= lowerLimit;
 
-            if (canScrollDown || canScrollUp) {
+            boolean scrollDebug = relationsRects.size() > 4 && (lastRect.y + 150 < lowerLimit || firstRect.y > upperLimit);
+
+            if (canScrollDown || canScrollUp || scrollDebug) {
                 for (Rectangle rect : relationsRects) {
                     rect.y -= notches * 20;
                 }
