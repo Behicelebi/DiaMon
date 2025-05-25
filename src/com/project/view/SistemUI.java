@@ -56,7 +56,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     JPasswordField sifreGiris = new JPasswordField();
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
     String dogumSqlDate = "",gunlukUyari = "",gunlukUyariAciklama="";
-    int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1;
+    int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1, sifreDegistirildiMi=-1;
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
@@ -955,7 +955,15 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             g.drawString("Günlük Uyarı: "+gunlukUyari,660,675);
             g.drawString(gunlukUyariAciklama,660,695);
         }
+        if(sifreDegistirildiMi == 1){
+            g.setColor(Color.GREEN);
+            g.drawString("Şifre Değiştirildi", 960,680);
+        } else if(sifreDegistirildiMi == 0){
+            g.setColor(Color.RED);
+            g.drawString("Şifre Değiştirilemedi", 960,680);
+        }
         g.setFont(new Font("Consolas",Font.PLAIN,15));
+        g.setColor(Color.WHITE);
     }
     public void draw(Graphics g){
         g.drawImage(background,0,0,WIDTH,HEIGHT,null);
@@ -1494,6 +1502,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 int result = JOptionPane.showConfirmDialog(null, "Çıkış yapmak istediğinize emin misiniz?", "Çıkış Yapma", JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
                     olcumGirildiMi = -1;
+                    sifreDegistirildiMi = -1;
                     sifreDegistir.setVisible(false);
                     sifreDegistir.setText("");
                     sifreDegistirButton.setVisible(false);
@@ -1728,9 +1737,14 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                     ps.executeUpdate();
                     conn.commit();
                     sifreDegistir.setText("");
+                    sifreDegistirildiMi=1;
+                    repaint();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
+            }else {
+                sifreDegistirildiMi=0;
+                repaint();
             }
         }
     }
