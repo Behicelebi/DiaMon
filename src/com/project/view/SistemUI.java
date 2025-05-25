@@ -40,11 +40,7 @@ import java.util.logging.Logger;
 import java.util.Date;
 
 public class SistemUI extends JPanel implements ActionListener , MouseWheelListener {
-    enum Screen {
-        MAIN,
-        HASTA_EKLE,
-        HASTA_PROFIL
-    }
+    enum Screen {MAIN, HASTA_EKLE, HASTA_PROFIL}
     Screen currentScreen = Screen.MAIN;
     int WIDTH;
     int HEIGHT;
@@ -108,39 +104,39 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         }
                         if(relations.get(secilenHasta).olcumler.get(0) < 70){
                             if(relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
-                                diyetGecmis.setSelectedIndex(2);
+                                diyetGecmis.setSelectedItem("Dengeli Beslenme");
                                 egzersizGecmis.setSelectedIndex(0);
                             }
                         } else if (relations.get(secilenHasta).olcumler.get(0) >= 70 && relations.get(secilenHasta).olcumler.get(0) < 110) {
                             if(relations.get(secilenHasta).belirtiler.contains("Kilo Kaybı") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk")){
-                                diyetGecmis.setSelectedIndex(3);
-                                egzersizGecmis.setSelectedIndex(1);
+                                diyetGecmis.setSelectedItem("Az Şekerli Diyet");
+                                egzersizGecmis.setSelectedItem("Yürüyüş");
                             }
                             if (relations.get(secilenHasta).belirtiler.contains("Polifaji") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                diyetGecmis.setSelectedIndex(2);
-                                egzersizGecmis.setSelectedIndex(1);
+                                diyetGecmis.setSelectedItem("Dengeli Beslenme");
+                                egzersizGecmis.setSelectedItem("Yürüyüş");
                             }
                         } else if (relations.get(secilenHasta).olcumler.get(0) >= 110 && relations.get(secilenHasta).olcumler.get(0) < 180) {
                             if(relations.get(secilenHasta).belirtiler.contains("Bulanık Görme") && relations.get(secilenHasta).belirtiler.contains("Nöropati")){
-                                diyetGecmis.setSelectedIndex(3);
-                                egzersizGecmis.setSelectedIndex(2);
+                                diyetGecmis.setSelectedItem("Az Şekerli Diyet");
+                                egzersizGecmis.setSelectedItem("Klinik Egzersiz");
                             }
                             if (relations.get(secilenHasta).belirtiler.contains("Poliüri") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                diyetGecmis.setSelectedIndex(1);
-                                egzersizGecmis.setSelectedIndex(1);
+                                diyetGecmis.setSelectedItem("Şekersiz Diyet");
+                                egzersizGecmis.setSelectedItem("Klinik Egzersiz");
                             }
                             if (relations.get(secilenHasta).belirtiler.contains("Nöropati") && relations.get(secilenHasta).belirtiler.contains("Yorgunluk") && relations.get(secilenHasta).belirtiler.contains("Bulanık Görme")) {
-                                diyetGecmis.setSelectedIndex(3);
-                                egzersizGecmis.setSelectedIndex(1);
+                                diyetGecmis.setSelectedItem("Az Şekerli Diyet");
+                                egzersizGecmis.setSelectedItem("Yürüyüş");
                             }
                         } else if (relations.get(secilenHasta).olcumler.get(0) >= 180) {
                             if (relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi")) {
-                                diyetGecmis.setSelectedIndex(1);
-                                egzersizGecmis.setSelectedIndex(1);
+                                diyetGecmis.setSelectedItem("Şekersiz Diyet");
+                                egzersizGecmis.setSelectedItem("Klinik Egzersiz");
                             }
                             if(relations.get(secilenHasta).belirtiler.contains("Yaraların Yavaş İyileşmesi") && relations.get(secilenHasta).belirtiler.contains("Polidipsi") && relations.get(secilenHasta).belirtiler.contains("Polifaji")){
-                                diyetGecmis.setSelectedIndex(1);
-                                egzersizGecmis.setSelectedIndex(2);
+                                diyetGecmis.setSelectedItem("Şekersiz Diyet");
+                                egzersizGecmis.setSelectedItem("Yürüyüş");
                             }
                         }
                         tarihSec.setVisible(true);
@@ -848,7 +844,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
         g2d.setColor(Color.WHITE);
         g2d.drawLine(320, 266, 320, HEIGHT);
-        //g2d.drawLine(960, 266, 960, HEIGHT);
         g2d.drawLine(2,266,WIDTH,266);
         g2d.setStroke(new BasicStroke(2f));
         g2d.setColor(Color.BLUE);
@@ -925,6 +920,10 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         } else if(olcumGirildiMi == 0){
             g.setColor(Color.RED);
             g.drawString("Ölçüm Girilemedi", 980,360);
+        } else if(olcumGirildiMi == 2){
+            g.setColor(Color.GREEN);
+            g.drawString("Ölçüm Girildi", 980,360);
+            g.drawString("(Ortalama Hesabına Katılmadı)", 980,380);
         }
 
         g.setColor(Color.WHITE);
@@ -1112,10 +1111,12 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     public String tarihReformat2(String tarih){return tarih.substring(8,10)+"-"+tarih.substring(5,8)+tarih.substring(0,4);}
 
     public void tarihUpdate(Kullanici kullanici){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate smallestDate=null,highestDate=null;
         for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
-            boolean exists = false;
-            for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(tarihReformat2(kullanici.olcumTarihleri.get(i)).equals(tarihSec.getItemAt(j))){exists = true;}}
-            if(!exists){tarihSec.addItem(tarihReformat2(kullanici.olcumTarihleri.get(i)));}
+            LocalDate tempDate = LocalDate.parse(tarihReformat2(kullanici.olcumTarihleri.get(i)), formatter);
+            if(smallestDate==null || smallestDate.isAfter(tempDate)){smallestDate = tempDate;}
+            if(highestDate==null || highestDate.isBefore(tempDate)){highestDate = tempDate;}
         }
         String sql = "SELECT hasta_tc, FORMAT(insulin_tarihi, 'dd-MM-yyyy') AS insulin_tarihi FROM HASTA_INSULIN WHERE hasta_tc = ? ORDER BY insulin_tarihi";
         String sql1 = "SELECT hasta_tc, FORMAT(tarih, 'dd-MM-yyyy') AS tarih FROM HASTA_DIYET_CHECK WHERE hasta_tc = ? ORDER BY tarih";
@@ -1134,31 +1135,38 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 String utilDate = rs.getString("insulin_tarihi");
-                boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
-                if(!exists){tarihSec.addItem(String.valueOf(utilDate));}
+                LocalDate tempDate = LocalDate.parse(utilDate, formatter);
+                if(smallestDate==null || smallestDate.isAfter(tempDate)){smallestDate = tempDate;}
+                if(highestDate==null || highestDate.isBefore(tempDate)){highestDate = tempDate;}
             }
             rs = ps1.executeQuery();
             while(rs.next()){
                 String utilDate = rs.getString("tarih");
-                boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
-                if(!exists){tarihSec.addItem(utilDate);}
+                LocalDate tempDate = LocalDate.parse(utilDate, formatter);
+                if(smallestDate==null || smallestDate.isAfter(tempDate)){smallestDate = tempDate;}
+                if(highestDate==null || highestDate.isBefore(tempDate)){highestDate = tempDate;}
             }
             rs = ps2.executeQuery();
             while(rs.next()){
                 String utilDate = rs.getString("tarih");
-                boolean exists = false;
-                for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
-                if(!exists){tarihSec.addItem(utilDate);}
+                LocalDate tempDate = LocalDate.parse(utilDate, formatter);
+                if(smallestDate==null || smallestDate.isAfter(tempDate)){smallestDate = tempDate;}
+                if(highestDate==null || highestDate.isBefore(tempDate)){highestDate = tempDate;}
             }
             if(this.kullanici.rol.equals("DOKTOR")){
                 rs = ps3.executeQuery();
                 while(rs.next()){
                     String utilDate = rs.getString("tarih");
-                    boolean exists = false;
-                    for (int j = 0; j < tarihSec.getItemCount() && !exists; j++) {if(utilDate.equals(String.valueOf(tarihSec.getItemAt(j)))){exists = true;}}
-                    if(!exists){tarihSec.addItem(utilDate);}
+                    LocalDate tempDate = LocalDate.parse(utilDate, formatter);
+                    if(smallestDate==null || smallestDate.isAfter(tempDate)){smallestDate = tempDate;}
+                    if(highestDate==null || highestDate.isBefore(tempDate)){highestDate = tempDate;}
+                }
+            }
+            if(smallestDate!=null){
+                LocalDate current = smallestDate;
+                while (!current.isAfter(highestDate)) {
+                    tarihSec.addItem(current.format(formatter));
+                    current = current.plusDays(1);
                 }
             }
         } catch (SQLException ex) {
@@ -1343,7 +1351,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             RoundedButton okButton = new RoundedButton("OK");
             okButton.addActionListener(ev -> {
                 dateChooser.setDate(calendar.getDate());
-                java.util.Date utilDate = dateChooser.getDate();
+                Date utilDate = dateChooser.getDate();
                 dogumSqlDate = tarihReformat2(String.valueOf(new java.sql.Date(utilDate.getTime())));
                 dialog.dispose();
                 repaint();
@@ -1354,7 +1362,6 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             dialog.setLocationRelativeTo(Main.frame);
             dialog.setVisible(true);
         } else if (e.getSource() == girisYap) {
-            //Bu hata kontrol için sonra test ederim (etmedi)
             if(TC_Giris.getText().length() == 11 && !adGiris.getText().equals("") && !soyadGiris.getText().equals("") && !sifreGiris.getPassword().equals("") && !emailGiris.getText().equals("") && !dogumSqlDate.equals("") && selectedFile != null && !olcumGiris.getText().equals("")) {
                 String sql = "INSERT INTO KULLANICI (tc_no, ad, soyad, sifre, email, dogum_tarihi, cinsiyet, profil_resmi, rol) " +
                         "VALUES (?, ?, ?, HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)), ?, ?, ?, ?, 'HASTA')";
@@ -1514,9 +1521,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 Calendar selected = Calendar.getInstance();
                 selected.setTime(calendar.getDate());
 
-                boolean isSameDay =
-                        selected.get(Calendar.YEAR) == initialCal.get(Calendar.YEAR) &&
-                                selected.get(Calendar.DAY_OF_YEAR) == initialCal.get(Calendar.DAY_OF_YEAR);
+                boolean isSameDay = selected.get(Calendar.YEAR) == initialCal.get(Calendar.YEAR) && selected.get(Calendar.DAY_OF_YEAR) == initialCal.get(Calendar.DAY_OF_YEAR);
 
                 int currentSpinnerValue = (int) hourSpinner.getValue();
 
@@ -1602,8 +1607,9 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         conn.commit();
                         int temp_tarih = tarihSec.getSelectedIndex();
                         initialize();
-                        olcumGirildiMi = 1;
                         LocalDateTime ldt = selectedDateTime[0].toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                        if(ldt.getHour()==7 || ldt.getHour()==12 || ldt.getHour()==15 || ldt.getHour()==18 || ldt.getHour()==22){olcumGirildiMi = 1;}
+                        else{olcumGirildiMi = 2;}
                         insulinCheck(ldt, ldt, kullanici);
                         tarihSec.setSelectedIndex(temp_tarih);
                         repaint();
@@ -1657,10 +1663,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
         } else if(e.getSource() == diyetYap){
             String sql = "INSERT INTO HASTA_DIYET_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
-            try (
-                    Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                    PreparedStatement ps = conn.prepareStatement(sql);
-            ) {
+            try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, String.valueOf(kullanici.tc_no));
                 ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
                 ps.setString(3, "1");
@@ -1676,10 +1680,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
         } else if (e.getSource() == egzersizYap) {
             String sql = "INSERT INTO HASTA_EGZERSIZ_CHECK (hasta_tc, tarih, yapildi_mi) VALUES (?, ?, ?)";
-            try (
-                    Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
-                    PreparedStatement ps = conn.prepareStatement(sql);
-            ) {
+            try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, String.valueOf(kullanici.tc_no));
                 ps.setString(2, String.valueOf(new java.sql.Timestamp(selectedDateTime[0].getTime())));
                 ps.setString(3, "1");
