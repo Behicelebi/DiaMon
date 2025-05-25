@@ -1,8 +1,5 @@
 package com.project.view;
 
-
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.project.kullanicilar.Kullanici;
 import com.project.main.Main;
 import com.project.util.EmailSender;
@@ -11,13 +8,17 @@ import com.toedter.calendar.JDateChooser;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYBarDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -364,7 +365,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 graphFrame.setLocationRelativeTo(null);
                 graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-                ChartPanel chartPanel = createChartPanel();
+                ChartPanel chartPanel = createChartPanel(kullanici);
                 graphFrame.setContentPane(chartPanel);
 
                 graphFrame.setVisible(true);
@@ -574,37 +575,88 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         }
     }
 
-    private ChartPanel createChartPanel() {
+    private ChartPanel createChartPanel(Kullanici kullanici) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
         XYSeries series = new XYSeries("Kan Şekeri");
-        if(kullanici.rol.equals("HASTA")){
+
+        if ("HASTA".equals(kullanici.rol)) {
             for (int i = 0; i < kullanici.olcumTarihleri.size(); i++) {
-                if(kullanici.olcumTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
+                if (kullanici.olcumTarihleri.get(i).substring(0, 10)
+                        .equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))) {
                     LocalDateTime dateTime = LocalDateTime.parse(kullanici.olcumTarihleri.get(i), formatter);
                     series.add(dateTime.getHour(), kullanici.olcumler.get(i));
                 }
             }
-        }else if (kullanici.rol.equals("DOKTOR")){
+        } else {
             for (int i = 0; i < relations.get(secilenHasta).olcumTarihleri.size(); i++) {
-                if(relations.get(secilenHasta).olcumTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
+                if (relations.get(secilenHasta).olcumTarihleri.get(i).substring(0, 10)
+                        .equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))) {
                     LocalDateTime dateTime = LocalDateTime.parse(relations.get(secilenHasta).olcumTarihleri.get(i), formatter);
                     series.add(dateTime.getHour(), relations.get(secilenHasta).olcumler.get(i));
                 }
             }
         }
 
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(series);
+        XYSeriesCollection xyCollection = new XYSeriesCollection(series);
+        XYBarDataset barDataset = new XYBarDataset(xyCollection, 0.9);
 
-        JFreeChart chart = ChartFactory.createXYLineChart(
+        JFreeChart chart = ChartFactory.createXYBarChart(
                 "Kan Şekeri Grafiği",
                 "SAAT",
+                false,
                 "ÖLÇÜMLER",
-                dataset
+                barDataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
         );
 
-        return new ChartPanel(chart);
+        NumberAxis domain = (NumberAxis) chart.getXYPlot().getDomainAxis();
+        domain.setAutoRange(false);
+        domain.setRange(0, 23);
+        domain.setTickUnit(new NumberTickUnit(1));
+        domain.setLowerMargin(0);
+        domain.setUpperMargin(0);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setLayout(new BorderLayout());
+
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
+        southPanel.setOpaque(false);
+
+        String diyetTemp, egzersizTemp;
+
+        if(kullanici.rol.equals("HASTA")){
+            diyetTemp = kullanici.diyetOneri;
+            egzersizTemp = kullanici.egzersizOneri;
+        }else{
+            diyetTemp = relations.get(secilenHasta).diyetOneri;
+            egzersizTemp = relations.get(secilenHasta).egzersizOneri;
+        }
+
+        JLabel diyetLabel = new JLabel("Önerilen Diyet: " + diyetTemp);
+        diyetLabel.setBorder(new EmptyBorder(0, 5, 2, 0));
+        diyetLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        diyetLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        diyetLabel.setFont(new Font("Consolas", Font.PLAIN, 13));
+        diyetLabel.setForeground(Color.BLACK);
+
+        JLabel egzersizLabel = new JLabel("Önerilen Egzersiz: " + egzersizTemp);
+        egzersizLabel.setBorder(new EmptyBorder(0, 5, 5, 0));
+        egzersizLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        egzersizLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        egzersizLabel.setFont(new Font("Consolas", Font.PLAIN, 13));
+        egzersizLabel.setForeground(Color.BLACK);
+
+        southPanel.add(diyetLabel);
+        southPanel.add(egzersizLabel);
+        chartPanel.add(southPanel, BorderLayout.SOUTH);
+
+        return chartPanel;
     }
+
 
     public void initialize(){
         String sql = "SELECT tc_no, ad, soyad, email, FORMAT(dogum_tarihi, 'dd-MM-yyyy') AS dogum_tarihi, cinsiyet, profil_resmi, rol FROM KULLANICI " +

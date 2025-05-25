@@ -23,7 +23,6 @@ public class Main {
             frame = new Frame();
         } catch (UnsupportedLookAndFeelException e) {
             throw new RuntimeException(e);
-
         }
     }
 }

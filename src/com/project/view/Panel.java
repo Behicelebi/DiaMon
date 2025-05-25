@@ -1,9 +1,6 @@
 package com.project.view;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.project.main.Main;
-
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
