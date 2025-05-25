@@ -1430,8 +1430,22 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                         ps3.executeUpdate();
 
                         System.out.println("Kullanıcı başarıyla eklendi.");
-                        EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", "Merhaba " + adGiris.getText() + " " + soyadGiris.getText()
-                                + " !\nGiriş şifreniz: " + new String(sifreGiris.getPassword()) + "\n\nDiyabet Sistemi");
+                        String mailIcerigi = String.format("""
+                            Merhaba %s %s,
+                
+                            Diyabet Takip Sistemi hesabınız başarıyla oluşturuldu.
+                
+                              • Kullanıcı adınız : %s (TC Kimlik Numaranız)
+                              • Geçici şifreniz  : %s
+                
+                            İlk girişinizden sonra isterseniz şifrenizi değiştirebilirsiniz.
+                
+                            Bu e-posta gizli bilgiler içerir; lütfen kimseyle paylaşmayın.
+                            Sağlıklı günler dileriz.
+                
+                            Sağlık Bakanlığı Diyabet Takip Sistemi Destek Ekibi
+                        """, adGiris.getText(), soyadGiris.getText(), TC_Giris.getText(), new String(sifreGiris.getPassword()));
+                        EmailSender.sendEmail(emailGiris.getText(), "Diyabet Sistemi Girişiniz Başarılı", mailIcerigi);
                     } else {
                         System.out.println("Kullanıcı eklenemedi.");
                     }
