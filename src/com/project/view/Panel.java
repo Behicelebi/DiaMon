@@ -81,14 +81,6 @@ public class Panel extends JPanel implements ActionListener {
         kullaniciAdiGiris.setBounds(WIDTH/2-125,310,250,25);
         kullaniciAdiGiris.setFont(new Font("Calibri",Font.PLAIN,15));
         kullaniciAdiGiris.setVisible(false);
-        kullaniciAdiGiris.setDocument(new PlainDocument(){
-            @Override
-            public void insertString(int offs, String str, AttributeSet a)
-                    throws BadLocationException {
-                if(getLength() + str.length() <= kullanici_limit)
-                    super.insertString(offs, str, a);
-            }
-        });
         kullaniciAdiGiris.setDocument(new PlainDocument() {
             @Override
             public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {

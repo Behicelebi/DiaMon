@@ -86,7 +86,7 @@ public class CreateUsers {
             stmt.executeUpdate("GRANT SELECT ON UYARI_TURU TO doktor_role");
 
             // Hasta yetkileri
-            stmt.executeUpdate("GRANT SELECT ON KULLANICI TO hasta_role");
+            stmt.executeUpdate("GRANT SELECT, UPDATE ON KULLANICI TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON HASTA_DOKTOR TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON HASTA_DIYET TO hasta_role");
             stmt.executeUpdate("GRANT SELECT ON HASTA_EGZERSIZ TO hasta_role");

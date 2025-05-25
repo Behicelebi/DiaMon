@@ -50,18 +50,16 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
     Rectangle kullaniciRect = new Rectangle(10,130,620,130);
     ArrayList<Kullanici> relations = new ArrayList<>();
     ArrayList<Rectangle> relationsRects = new ArrayList<>();
-    RoundedButton hastaEkle = new RoundedButton("Hasta Ekle"), girisYap = new RoundedButton("Hasta Ekle"), geriButton = new RoundedButton("Geri"), profilSecimi = new RoundedButton("Seç"), cikisButton = new RoundedButton("Çıkış Yap"), selectDate = new RoundedButton("Tarih Seç"), olcumGir = new RoundedButton("Kayıt Et"), oneriYap = new RoundedButton("Öneri Yap"), diyetYap = new RoundedButton("Diyet Yap"), egzersizYap = new RoundedButton("Egzersiz Yap"), graphGoster = new RoundedButton("Kan şekeri grafiği");
-    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField();
+    RoundedButton hastaEkle = new RoundedButton("Hasta Ekle"), girisYap = new RoundedButton("Hasta Ekle"), geriButton = new RoundedButton("Geri"), profilSecimi = new RoundedButton("Seç"), cikisButton = new RoundedButton("Çıkış Yap"), selectDate = new RoundedButton("Tarih Seç"), olcumGir = new RoundedButton("Kayıt Et"), oneriYap = new RoundedButton("Öneri Yap"), diyetYap = new RoundedButton("Diyet Yap"), egzersizYap = new RoundedButton("Egzersiz Yap"), graphGoster = new RoundedButton("Kan şekeri grafiği"), dogumSecimButton = new RoundedButton("Doğum Tarihi Seç"), sifreDegistirButton = new RoundedButton("Şifre Değiştir");
+    JTextField TC_Giris = new JTextField(), adGiris = new JTextField(), soyadGiris = new JTextField(), emailGiris = new JTextField(), olcumGiris = new JTextField(), sifreDegistir = new JTextField();
     JComboBox<String> cinsiyetGiris = new JComboBox<String>(), belirti_1_giris = new JComboBox<String>(), belirti_2_giris = new JComboBox<String>(), belirti_3_giris = new JComboBox<String>(), belirtiFiltreleme = new JComboBox<String>(), diyetGecmis = new JComboBox<String>(), egzersizGecmis = new JComboBox<String>(), tarihSec = new JComboBox<String>(), olcumFiltreleme = new JComboBox<String>();
     JPasswordField sifreGiris = new JPasswordField();
-    RoundedButton dogumSecimButton = new RoundedButton("Doğum Tarihi Seç");
     final String doktorUser = "doktor_login", hastaUser = "hasta_login", doktorPassword = "doktor123", hastaPassword = "hasta123";
-    String dogumSqlDate = "";
+    String dogumSqlDate = "",gunlukUyari = "",gunlukUyariAciklama="";
     int kullanici_limit = 11, sifre_limit = 15, hastaError = 0, secilenHasta = 0, olcumGirildiMi = -1, diyetYapildi = -1, egzersizYapildi = -1;
     File selectedFile = null;
     Date[] selectedDateTime = {new Date()};
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:SS");
-    String gunlukUyari = "",gunlukUyariAciklama="";
     Image background;
 
     SistemUI(int WIDTH, int HEIGHT){
@@ -73,11 +71,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         this.setLayout(null);
         this.addMouseWheelListener(this);
 
-        try {
-            background = ImageIO.read(new File("textures/saglik_bakanligi.png"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        try {background = ImageIO.read(new File("textures/saglik_bakanligi.png"));}
+        catch (IOException e) {throw new RuntimeException(e);}
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MINUTE, 0);
@@ -200,6 +195,28 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
             }
         });
         this.add(olcumGiris);
+
+        sifreDegistir.setPreferredSize(new Dimension(10,300));
+        sifreDegistir.setBounds(660,668,135,25);
+        sifreDegistir.setFont(new Font("Calibri",Font.PLAIN,15));
+        sifreDegistir.setVisible(false);
+        sifreDegistir.setDocument(new PlainDocument(){
+            @Override
+            public void insertString(int offs, String str, AttributeSet a)
+                    throws BadLocationException {
+                if(getLength() + str.length() <= sifre_limit)
+                    super.insertString(offs, str, a);
+            }
+        });
+        this.add(sifreDegistir);
+
+        sifreDegistirButton.setBounds(820,670,110,20);
+        sifreDegistirButton.setFont(new Font("Calibri",Font.BOLD,15));
+        sifreDegistirButton.setHorizontalAlignment(SwingConstants.CENTER);
+        sifreDegistirButton.setVisible(false);
+        sifreDegistirButton.setFocusable(false);
+        sifreDegistirButton.addActionListener(this);
+        this.add(sifreDegistirButton);
 
         belirti_1_giris.setPreferredSize(new Dimension(10,300));
         belirti_1_giris.setBounds(WIDTH/2-515,178,250,25);
@@ -661,6 +678,8 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         else if (kullanici.rol.equals("HASTA")) {
             belirtiFiltreleme.setVisible(false);
             olcumFiltreleme.setVisible(false);
+            sifreDegistir.setVisible(true);
+            sifreDegistirButton.setVisible(true);
             tarihSec.removeAllItems();
             tarihSec.setVisible(true);
             tarihUpdate(kullanici);
@@ -931,6 +950,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         if(this.kullanici.rol.equals("HASTA")){
             g.drawString("Ölçüm Giriş: ", 980,290);
             g.drawString("mg/dL", 1090,325);
+            g.drawString("Şifre Değiştir:",660,660);
         } else{
             g.drawString("Günlük Uyarı: "+gunlukUyari,660,675);
             g.drawString(gunlukUyariAciklama,660,695);
@@ -1474,6 +1494,9 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 int result = JOptionPane.showConfirmDialog(null, "Çıkış yapmak istediğinize emin misiniz?", "Çıkış Yapma", JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
                     olcumGirildiMi = -1;
+                    sifreDegistir.setVisible(false);
+                    sifreDegistir.setText("");
+                    sifreDegistirButton.setVisible(false);
                     Main.frame.switchScreen(0);
                 }
             }
@@ -1694,6 +1717,20 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
                 tarihUpdate(kullanici);
             } catch (SQLException ex) {
                 ex.printStackTrace();
+            }
+        } else if (e.getSource() == sifreDegistirButton) {
+            if(!sifreDegistir.getText().equals("")){
+                String sql = "UPDATE KULLANICI SET sifre = HASHBYTES('SHA2_256', CONVERT(NVARCHAR(MAX), ?)) WHERE tc_no = ?";
+                try (Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); // HASTA
+                     PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, sifreDegistir.getText());
+                    ps.setString(2, String.valueOf(kullanici.tc_no));
+                    ps.executeUpdate();
+                    conn.commit();
+                    sifreDegistir.setText("");
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
