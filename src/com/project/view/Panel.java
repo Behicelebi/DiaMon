@@ -26,7 +26,6 @@ public class Panel extends JPanel implements ActionListener {
     int secti = 0;
     final int kullanici_limit = 11, sifre_limit = 15;
     boolean girisHata = false;
-    private Dimension originalSize = new Dimension(1280, 720);
     Image background;
 
     Panel(int WIDTH, int HEIGHT){

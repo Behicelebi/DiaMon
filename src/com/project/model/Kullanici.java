@@ -1,4 +1,4 @@
-package com.project.kullanicilar;
+package com.project.model;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;

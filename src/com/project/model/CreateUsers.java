@@ -2,7 +2,6 @@ package com.project.model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLOutput;
 import java.sql.Statement;
 
 public class CreateUsers {
@@ -25,7 +24,7 @@ public class CreateUsers {
                             "END";
             stmt.executeUpdate(createLoginHasta);
 
-            stmt.execute("USE PROJETEST");
+            stmt.execute("USE DiyabetSistem");
 
             // doktor_user kullanıcısı
             String createUserDoktor =

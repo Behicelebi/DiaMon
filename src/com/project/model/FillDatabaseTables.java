@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.security.MessageDigest;
 
 public class FillDatabaseTables {
 
-    private final String connectionUrl = "jdbc:sqlserver://localhost:1433;databaseName=PROJETEST;user=SA;password=diyabet1234;encrypt=false";
+    private final String connectionUrl = "jdbc:sqlserver://localhost:1433;databaseName=DiyabetSistem;user=SA;password=diyabet1234;encrypt=false";
 
     public FillDatabaseTables() {
         try (Connection conn = DriverManager.getConnection(connectionUrl)) {
@@ -40,7 +39,7 @@ public class FillDatabaseTables {
             pstmt.setString(5, "muratemrebicici@gmail.com");
             pstmt.setDate(6, Date.valueOf("2005-08-30"));
             pstmt.setString(7, "E");
-            byte[] resim = setResim("textures/profil_resmi.png"); 
+            byte[] resim = setResim("textures/murat_profil_resmi.png");
             pstmt.setBytes(8, resim);
             pstmt.setString(9, "DOKTOR");
 
@@ -127,5 +126,4 @@ public class FillDatabaseTables {
         }
         return data;
     }
-
 }

@@ -10,10 +10,10 @@ public class CreateDatabase {
 
         try (Connection conn = DriverManager.getConnection(connectionUrl); Statement stmt = conn.createStatement()) {
 
-            String createDB = "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'PROJETEST') " +
-                    "BEGIN CREATE DATABASE PROJETEST COLLATE Turkish_CI_AS END";
+            String createDB = "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'DiyabetSistem') " +
+                    "BEGIN CREATE DATABASE DiyabetSistem COLLATE Turkish_CI_AS END";
             stmt.executeUpdate(createDB);
-            stmt.execute("USE PROJETEST");
+            stmt.execute("USE DiyabetSistem");
 
             // KULLANICI tablosu
             String createKullaniciTable =
