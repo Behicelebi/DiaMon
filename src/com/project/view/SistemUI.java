@@ -803,7 +803,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         String sql4 = "SELECT * FROM UYARI_TURU WHERE uyari_turu_id = ?";
         String sql5 = "SELECT D.tur_adi FROM HASTA_DIYET H, DIYET_TURU D WHERE H.hasta_tc = ? AND H.diyet_turu_id = D.diyet_turu_id";
         String sql6 = "SELECT E.tur_adi FROM HASTA_EGZERSIZ H, EGZERSIZ_TURU E WHERE H.hasta_tc = ? AND H.egzersiz_turu_id = E.egzersiz_turu_id";
-        String sql7 = "SELECT * FROM HASTA_INSULIN H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id = H.uyari_turu_id";
+        String sql7 = "SELECT * FROM HASTA_INSULIN H, UYARI_TURU U WHERE H.hasta_tc = ? AND U.uyari_turu_id = H.uyari_turu_id ORDER BY insulin_tarihi";
         try (
                 Connection conn = DriverManager.getConnection(Main.url, hastaUser, hastaPassword); //HASTA GIRISI
                 PreparedStatement ps = conn.prepareStatement(sql1);
@@ -960,7 +960,7 @@ public class SistemUI extends JPanel implements ActionListener , MouseWheelListe
         for (int i = 0; i < kullanici.insulinTarihleri.size(); i++) {
             if(kullanici.insulinTarihleri.get(i).substring(0,10).equals(tarihReformat(String.valueOf(tarihSec.getSelectedItem())))){
                 g.drawString(kullanici.insulinTarihleri.get(i).substring(11,21)+" -> " + kullanici.insulinDegerleri.get(i) + " ml (" + kullanici.insulinUyarilar.get(i)+")",660,455+temp*34);
-                g.drawString(kullanici.insulinUyariAciklamalar.get(i),660,472+temp*34);
+                if(!kullanici.insulinUyarilar.get(i).equals("Uyarı Yok")){g.drawString(kullanici.insulinUyariAciklamalar.get(i),660,472+temp*34);}
                 temp++;
             }
         }
