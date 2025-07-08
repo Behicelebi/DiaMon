@@ -137,7 +137,7 @@ CREATE TABLE HASTA_OLCUM (
 
 <p align="center">
   <strong>Giriş Ekranı</strong><br>
-  <img src="[path/to/login_screen.png](https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a1.jpg?" width="400" alt="Giriş Ekranı">
+  <img src="https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a1.jpg" width="400" alt="Giriş Ekranı">
 </p>
 <p align="center">
   <strong>Hasta Paneli</strong><br>
