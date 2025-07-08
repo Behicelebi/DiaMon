@@ -161,7 +161,7 @@ Bu projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izley
 
 2.  **Projeyi Klonlayın:**
     ```bash
-    git clone [https://github.com/kullanici-adiniz/DiaMon.git](https://github.com/kullanici-adiniz/DiaMon.git)
+    git clone [https://github.com/Behicelebi/DiaMon.git](https://github.com/Behicelebi/DiaMon.git)
     ```
 
 3.  **Projeyi Açın:**
