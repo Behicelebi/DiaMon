@@ -129,7 +129,7 @@ CREATE TABLE HASTA_OLCUM (
 
 ### ER Diyagramı
 <p align="center">
-  <img src="path/to/er_diagram.png" alt="ER Diyagramı">
+  <img src="https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a5.png" alt="ER Diyagramı">
 </p>
 
 
@@ -141,11 +141,11 @@ CREATE TABLE HASTA_OLCUM (
 </p>
 <p align="center">
   <strong>Hasta Paneli</strong><br>
-  <img src="path/to/patient_dashboard.png" width="600" alt="Hasta Paneli">
+  <img src="https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a2.jpg" width="600" alt="Hasta Paneli">
 </p>
 <p align="center">
   <strong>Doktor Paneli - Grafik Analiz</strong><br>
-  <img src="path/to/doctor_dashboard.png" width="600" alt="Doktor Paneli">
+  <img src="https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a3.jpg" width="600" alt="Doktor Paneli">
 </p>
 
 
