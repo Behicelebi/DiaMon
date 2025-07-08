@@ -52,6 +52,9 @@ Proje, üç ana bileşen üzerine kurulmuştur:
 1.  **Veritabanı Katmanı:** SQL Server üzerinde 3NF'ye göre normalleştirilmiş, ilişkisel bir veritabanı tasarlanmıştır. Veri tutarlılığı, yabancı anahtarlar ve kısıtlamalar ile sağlanmıştır.
 2.  **Masaüstü Uygulama (Java Swing):** Model-View-Controller (MVC) mimarisine benzer bir yaklaşımla geliştirilmiştir. Arayüz (View), iş mantığı (Controller) ve veri modelleri (Model) birbirinden ayrıştırılarak modüler bir yapı elde edilmiştir.
 3.  **Kural Tabanlı Motor:** Sistemin "beyni" olarak çalışan bu yapı, `if-else` blokları ile kan şekeri değerlerine ve belirtilere göre otomatik olarak öneri, uyarı ve insülin dozu hesaplamaları yapar.
+<p align="center">
+  <img src="https://github.com/Behicelebi/DiaMon/blob/main/screenshots/a4.png" alt="ER Diyagramı">
+</p>
 
 ## 🛠️ Kullanılan Teknolojiler ve Kütüphaneler
 
